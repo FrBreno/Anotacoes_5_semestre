@@ -16,6 +16,6 @@
 
 ## SPA (Sigle Page Application)
 
-**Pesquisar sobre**
+Um SPA (aplicativo de página única) é uma implementação de aplicativo da Web que carrega apenas um único documento da Web e, em seguida, atualiza o conteúdo do corpo desse documento único por meio de APIs JavaScript, como XMLHttpRequest e Fetch, quando um conteúdo diferente deve ser exibido.
 
 ---
