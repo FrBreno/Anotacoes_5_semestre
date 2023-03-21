@@ -105,3 +105,75 @@ FLOAT ID(match0) LPAREN CHAR STAR ID(s) RPAREN LBRACE IF LPAREN BANG ID(strncmp)
 ```
 
 ---
+## Aula 03 - Análise Léxica -  21.03.2023
+
+### Analisador léxico
+
+- Alguns símbolos têm um valor semântico associados a eles.
+  - IDs e NUMs.
+- Como são descritas as regras lexicográficas?
+- Um identificador é uma sequência de letras e dígitos.
+  - O primeiro caractere deve ser uma letra.
+  - O underscore "_" conta como uma letra.  
+  - Letras maiúsculas e minúsculas são diferentes.
+  - Se o fluxo de entrada resultar em um símbolo até um dado caractere, o próximo caractere é lido visando encontrar a maior string de caracteres possível que constitua um símbolo.  
+  - Espaços, tabs, novas linhas e comentários são ignorados exceto quando eles servem de separadores de símbolos.  
+  - Um espaço em branco é usado para separar identificadores adjacentes, palavras chaves e constantes.
+- Como os tokens são especificados?
+
+### Expressões Regulares
+
+- Uma linguagem é um conjunto de strings.
+- Uma string é uma sequência de símbolos.
+- Estes símbolos estão definidos em um alfabeto finito.  
+  - Ex.: Linguagem C ou Pascal, linguagem dos primos, etc.
+- Queremos poder dizer se uma string está ou não em uma linguagem.  
+- **Símbolos**:  Para cada símbolo _a_ no alfabeto da linguagem, a expressão regular _a_ representa a linguagem contendo somente a string _a_.  
+- **Alternação**: Dadas duas expressões regulares M e N, o operador de alternação (|) gera uma nova expressão M|N. Uma string está na linguagem de M|N se ela está na linguagem de M ou na linguagem de N.
+  - Ex.: A linguagem de _a_|_b_ contém as duas strings _a_ e _b_.
+- **Concatenação**: Dadas duas expressões M e N, o operador de concatenação (.) gera uma nova expressão M . N. Uma string está na linguagem de M . N se ela é a concatenação de quaisquer duas strings α e β tal que α está na linguagem de M e β está na linguagem de N.
+  - Ex.: (a|b) . a contém as strings aa e ba.  
+- **Epsilon**: A expressão regular  ε representa a linguagem cuja única string é a vazia.
+  - Ex.: (a . b)|ε representa a linguagem {" ", "ab"}
+- **Repetição**: Dada uma expressão regular M, seu Kleene closure é M*. Uma string está em M* se ela é a concatenação de zero ou mais strings todas em M.  
+  - Ex.: ((a|b) . a)* representa {" ", "aa", "ba", "aaaa", "baaa", "aaba", "baba", "aaaaa", ...}
+- Exemplos:  
+  - (0|1)* . 0
+    - Números binários múltiplos de 2.
+  - b*(abb*)*(a|ε)
+    - Strings de a's e b's sem a's consecutivos.
+  - (a|b)*aa(a|b)\*
+    - Strings de a's e b's com a's consecutivos.
+
+<div>
+  <img src="./imgs/A03-img01.png" alt="A03-img01"/>
+</div>
+
+- Como seriam as expressões regulares para os seguintes tokens?  
+  - IF
+    - if
+  - ID
+    - [a-z][a-z0-9]
+  - NUM
+    - [0-9]+
+
+- Quais símbolos representam as seguintes expressões regulares?  
+  - ([0-9]+"."[0-9]*)|([0-9]\*"."[0-9]+)
+    - R -> REAL.
+  - ("- -"[a-z]*"\n")|(""|"\n"|"\t")+
+    - Nenhum token, somente comentário, brancos, nova, linha e tab.
+
+### Analisador Léxico
+
+- Ambiguidade:
+  - if8 é um ID ou dois tokens IF e NUM(8)?
+  - if 89 começa com um ID ou uma palavra-reservada?
+- Duas regras:
+  - Maior casamento: o próximo símbolo sempre é a substring mais longa possível de ser casada.  
+  - Prioridade: Para uma dada substring mais longa, a primeira regra a ser casada produzirá o token.
+- A especificação deve ser completa, sempre reconhece uma substring da entrada.
+  - Mas quando estiver errada? Use uma regra com o "."
+  - Em que lugar da sua especificação deve estar esta regra?
+- Esta regra deve ser a última! (por quê?)
+
+---
