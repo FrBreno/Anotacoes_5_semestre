@@ -177,3 +177,87 @@ FLOAT ID(match0) LPAREN CHAR STAR ID(s) RPAREN LBRACE IF LPAREN BANG ID(strncmp)
 - Esta regra deve ser a última! (por quê?)
 
 ---
+## Aula 04 - Análise Léxica -  22.03.2023
+
+### Autômatos Finitos
+
+- Expressões regulares são convenientes para especificar os símbolos.
+- Precisamos de um formalismo que possa ser convertido em um programa de computador.
+- Este formalismo são os autômatos finitos.  
+- Um autômato finito possui:  
+  - Um conjunto finito de estados.
+  - Arestas levando de um estado a outro, anotada com um símbolo.
+  - Um estado inicial.
+  - Um ou mais estados finais.
+  - Normalmente os estados são numerados ou nomeados para facilitar a manipulação e discussão.
+
+<div>
+  <img src="./imgs/A04-img01.png" alt="A04-img01"/>
+</div>
+
+### Autômato Finito Determinístico
+
+- DFAs não podem apresentar duas arestas que deixam o mesmo estado, anotadas com o mesmo símbolo.  
+- Saindo do estado inicial o autômato segue extamente uma aresta para cada caractere da entrada.  
+- O DFA aceita a string se, após percorrer todos os caracteres, ele estiver em um estado final.  
+- Se em algum momento não houver uma aresta a ser pecorrida para um determinado caractere ou ele terminar em um estado não-final, a string é rejeitada.  
+- A linguagem reconhecida pelo autômato é o conjuto de todas as strings que ele aceita.
+- Consigo combinar os autômatos definidos para cada símbolo de maneira a ter um único autômato que possa ser usado como analisador léxico?
+  - Sim.
+  - Veremos um exemplo ad-hoc e mais adiante mecanismos formais para esta tarefa.
+
+### Autômato Finitos
+
+<div>
+  <img src="./imgs/A04-img02.png" alt="A04-img02"/>
+</div>
+
+&nbsp;
+### Autômato Combinado
+
+- Estados finais nomeados com o respectivo símbolo.  
+- Alguns estados apresentam caracterísitcas de mais de um autômato anterior.   
+  - Ex.: 2.
+- Como ocorre a quebra de ambiguidade entre ID e IF?
+
+<div>
+  <img src="./imgs/A04-img03.png" alt="A04-img03"/>
+</div>
+
+&nbsp;
+### Maior Substring
+
+- A tabela anterior é usada para aceitar ou recusar uma string.  
+- Porém, precisamos garantir que a maior string seja reconhecida.  
+- Necessitamos de duas informações.  
+  - Último estado final.
+  - Posição da entrada no último estado final.
+
+&nbsp;
+<div>
+  <img src="./imgs/A04-img04.png" alt="A04-img04"/>
+</div>
+
+- Pode ter mais de uma aresta saindo do mesmo estado com o mesmo símbolo.  
+- Pode ter aresta anotadas com o símbolo ε.  
+  - Essa aresta pode ser precorrida sem consumir nenhum caractere caractere de entrada.
+
+<div>
+  <img src="./imgs/A04-img05.png" alt="A04-img05"/>
+</div>
+
+<div>
+  <img src="./imgs/A04-img06.png" alt="A04-img06"/>
+</div>
+
+- Este autômato reconhece a mesma linguagem do autômato acima.
+
+### Autômato finito Não-Dterminístico
+
+- Não são apropriados para transformar em programas de computador.  
+  - "Adivinha" qual caminho deve ser seguido não é uma tarefa faacilmente executada pelo hardware dos computadores.  
+- NFAs se tornam úteis porque é fácil converter expressões regulares (ER) para NFA.
+
+
+
+---
