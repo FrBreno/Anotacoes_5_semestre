@@ -255,6 +255,7 @@
   - Dois fios de cobre isolados (é o tradicional cabo Ethernet).  
     - Categoria 3: fios de telefone tradicionais, Ethernet a 10 Mbps.
     - Categoria 5: Ethernet a 100 Mbps.
+- Exemplos de meios físicos são: Par de fios de cobre trançado, cabo coaxial, cabo de fibra ótica multimodo, espectro de rádio terrestre e espectro de rádio por satélite.
 ### Meio físico: cabo coaxial, fibra
 
 - **Cabo coaxial**:
@@ -266,10 +267,12 @@
   - Banda larga:
     - Múltiplos canais no cabo
     - HFC
+  - Como o par trançado, o cabo coaxial é constituído de dois condutores de cobre, porém concêntricos e não paralelos.
 - **Cabo de fibra ótica**:
   - Fibra de vidro conduzindo pulsos de luz. Cada pulso é um bit.
   - Operação em alta velocidade:
     - Transmissão em alta velocidade ponto a ponto (Ex.: 10-100 Gps).
+  - A fibra ótica é um meio delgado e flexível que conduz pulsos de luz, cada um deles representando um bit.
 
 ### Meio físico: rádio
 
@@ -280,6 +283,12 @@
   - Reflexão
   - Obstrução por objetos
   - Interferência
+- Os canais de rádio terrestres carregam sinais dentro do espectro eletromagnético.
+  - São um meio atraente porque sua instalação não requer cabos físicos, podem atravessar paredes, dão conectividade ao usuário móvel e, potencialmente, conseguem transmitir um sinal a longas distâncias.
+  - Podem ser classificados, a nível de operação, em:
+    - Distâncias muito curtas.
+    - Pequeno alcance.
+    - Longo alcance.
 - **Rasdo link types:**
   - micro-ondas terrestre
     - Ex.: até canais de 45 Mbps
@@ -288,6 +297,7 @@
   - àrea ampla (Ex.: celular)
     - celular 36: ~1 Mbps
   - satélite
+    - Um satélite de comunicação liga dois ou mais transmissores-receptores de micro-ondas baseados na Terra, denominados estações terrestres.
     - Canal de Kbps a 45 Mbps (ou múltiplos canais menores)
     - Atraso fim a fim de 270 msec.
     - Geoestacionário VS baixa altitude.
@@ -329,7 +339,9 @@ Resolução:
 ### Núcleo da rede: comutação de pacotes
 
 - **Cada fluxo de dados fim a fim dividido em pacotes**
-- Usuário A, pacotes de B compartilham recursos da rede.
+- Para enviar uma mensagem de um sistema final de origem para um destino, o originador fragmenta mensagens longas em porçoes de dados menores, denominados **pacotes**.  
+- Entre origem e destino, cada um deles percorre enlaces de comunicação e **comutadores de pacotes** (há dois tipos principais de comutadores de pacotes: **roteadores** e **comutadores de camada de enlace**).
+- Se um sistema final de origem ou um comutador de pacotes estiver enviando um pacote de L bits por um enlace com taxa de transmissão de R bits/s, então o tempo para transmitir o pacote é L/R segundos.
 - Cada pacote usa largura de banda total do enlace.
 - Recrusos usados quando necessário.
 - **Disputa por recursos**:
@@ -345,9 +357,15 @@ Resolução:
 
 ### Comutação de pacotes: store-and-forward
 
+- O comutador de pacotes deve receber o pacote inteiro antes de poder começar a transmitir o primeiro bit para o enlace de saída.
+- Supondo uma linha de transmissão de A até B passando por um comutador de pacotes, teríamos um atrase de 2L/R, pois o comutador iria receber o pacote inteiro antes de iniciar a transmissão.
+  - Se o comutador reenviasse os bits assim que chegassem, então o atraso total seria L/R.
+
 <div>
   <img src="./img/A02-img12.png" alt="A02-img12">
 </div>
+
+- Considerando um caso geral do envio de um pacote da origem ao destino por um caminho que consiste em N enlaces, cada um com taxa R (assim, há N - 1 roteadores entre a origem e o destino), teríamos que `d_fim_a_fim = N * L/R`.
 
 ### Comutação de pacotes VS comutação de circuitos
 
@@ -363,4 +381,132 @@ Resolução:
 ---
 ## Aula 03 - 23.03.2023
 
+### Estrutura da Internet
+
+- Aproximadamente hierárquica.  
+- **no centro: ISPs de "níve l"** -> Cobertura nacional/internacional.  
+  - Tratam uns aos outros como iguais.
+  - Ex. - Sprint:
+  <div>
+    <img src="./img/A03-img01.png" alt="A03-img01"/>
+  </div>
+- **ISPs de nível 2: ISPs menores (geralmente regionais)**
+  - Conectam a um ou a mais ISPs de nível 1, possívelmente outros ISPs de nível 2.
+  <div>
+    <img src="./img/A03-img02.png" alt="A03-img02"/>
+  </div>
+- **ISPs de nível 3 e ISPs locais**
+  - rede do último salto ("acesso"), mais próximo dos sistemas finais.
+  <div>
+    <img src="./img/A03-img03.png" alt="A03-img03"/>
+  </div>
+
+### Como ocorrem a perda e o atraso?
+
+- Pacotes se enfileiram em buffers de roteador.  
+  - Taxa de chegada de pacotes ao enlace ultrapassa capacidade de saída do enlace.
+  - Pacotes se enfileiram, esperam por sua vez.
+  - Se não houver buffers livres para armazenar os pacotes, os mesmos serão descartados.
+
+### Quatro fontes de atraso de pacotes
+
+1. Processamento nodal
+   - Verficar erros de bit.
+   - Determinar enlace de saída.  
+2. Enfileiramento
+   - Tempo esperado por transmissão no enlace de saída.  
+   - Depende do nível de congestionamento do roteador.
+3. Atraso de transmissão
+   - R = largura de banda do enlace (bps).
+   - L = tamanho do pacote (bits)
+   - Tempo para enviar bits no enlace = L/R.
+4. Atraso de propagação
+   - d = tamanho do enlace físico.  
+   - s = vel. de propagação no meio (~2*108 m/s)
+   - Atraso de propagação = d/s.
+
+### Atraso nodal
+
+<div>
+  <img src="./img/A03-img04.png" alt="A03-img04"/>
+</div>
+&nbsp;
+
+### Atraso de enfileiramento (revisado)
+
+- R = Largura de banda do enlace (bps).  
+- L = tamanho do pacote (bits)
+- a = taxa média de chegado de pacote
+- **Intensidade de tráfego = La/R**
+  - La/R ~ 0: Pequeno atraso de enfileiramento médio.
+  - La/R -> 1: Atrasos tornam-se grandes.
+  - La/R > 1: Mais "trabalho" chegando do que pode ser atendido, atraso médio infinito!
+
+<div>
+  <img src="./img/A03-img05.png" alt="A03-img05"/>
+</div>
+&nbsp;
+
+### Perda de pacote
+
+- Fila (ou buffer) antes do enlace no buffer tem capacidade finita.  
+- Pacote chegando à fila cheia -> descartado (ou perdido).  
+- Último pacote pode ser retransmitido pelo nó anterior, pela origem ou de forma nenhuma.
+
+### Vazão 
+
+- **Vazão**: taxa (bits/unidade de tempo) em que os bits são transferidos entre o emissor/receptor.  
+  - **Instantânea**: taxe em determinado ponto no tempo.  
+  - **média**: taxa por período de tempo maior.
+<div>
+  <img src="./img/A03-img06.png" alt="A03-img06"/>
+</div>
+
+### Vazão: cenário da internet
+
+- Na prática: Rc ou Rs normalmente é gargalo.
+- Vazão fim a fim por conexão: mim(Rc,Rs,R/10)
+- "R/10" porque há 10 conexões (aproximadamente) compatilhando enlace de gargalo do backbone a R bits/s
+
+### "Camadas" de protocolo
+
+- **Redes são complexas!**  
+  - muitas "partes":
+    - hospedeiros
+    - roteadores
+    - enlaces de vários meios físicos
+    - aplicações
+    - protocolos
+    - hardware, software
+- **Camada**: cada camada implementam um serviço.  
+  - por meio de suas própias ações da camada interna.  
+  - contando com serviços fornecidos pela camada abaixo.
+
+#### Por que usar camadas?
+
+- lidando com sistemas complexos:  
+  - estrutura explicita permite identificação e relação entre partes complexas do sistema.
+    - **modelo de referência** em camadas para discussão.  
+  - modularização facilita manutenção e atualização do sistema.  
+    - mudança de implementação do serviço da camada transparente ao restante do sistema.  
+    - Ex.: mudanças no procedimento de porta não afeta o restante do sistema.  
+- uso de camadas considerado prejudicial?  
+
+### Pilha de protocolos da Internet  
+
+- **aplicação**: suporte a aplicações de rede.  
+  - FTP, SMTP, HTTP.  
+- **transporte**: transferência de dados processo-processo.  
+  - TCP, UDP.  
+- **rede**: roteamento de datagramas da origem ao destino.  
+  - IP, protocolos de roteamento.  
+- **enlace**: transferência de dados entre elementos vizinhos da rede.  
+  - PPP, Ethernet.  
+- **física**: bits "nos fios".  
+
+#### Modelo de referência ISO/OSI  
+- **apresentação**: permite que as aplicações interpretem significado de dados. Ex.: criptografia, compactação, convenções específicas da máquina.  
+- **session**: sincronização, verificação, recuperação de troca de dados.  
+- Pilha da Internet não contém essas camadas.
+  - estes serviços, se necessários, devem ser implementados na aplicação.
 ---

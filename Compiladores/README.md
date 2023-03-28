@@ -238,6 +238,8 @@ FLOAT ID(match0) LPAREN CHAR STAR ID(s) RPAREN LBRACE IF LPAREN BANG ID(strncmp)
   <img src="./imgs/A04-img04.png" alt="A04-img04"/>
 </div>
 
+### Autômato finito Não-Dterminístico
+
 - Pode ter mais de uma aresta saindo do mesmo estado com o mesmo símbolo.  
 - Pode ter aresta anotadas com o símbolo ε.  
   - Essa aresta pode ser precorrida sem consumir nenhum caractere caractere de entrada.
@@ -252,12 +254,92 @@ FLOAT ID(match0) LPAREN CHAR STAR ID(s) RPAREN LBRACE IF LPAREN BANG ID(strncmp)
 
 - Este autômato reconhece a mesma linguagem do autômato acima.
 
-### Autômato finito Não-Dterminístico
 
 - Não são apropriados para transformar em programas de computador.  
   - "Adivinha" qual caminho deve ser seguido não é uma tarefa faacilmente executada pelo hardware dos computadores.  
 - NFAs se tornam úteis porque é fácil converter expressões regulares (ER) para NFA.
 
+---
+## Aula 05 - Análise Léxica -  28.03.2023
 
+### Convertendo ER's para NFA's
+- De maniera geral, toda ER terá um NFA com uma cauda (aresta de entrada) e uma cabeça (estado final).
+- Podemos definir essa conversão de maneira indutiva pois:
+  - Uma ER é primitiva (único símbolo ou vazio) ou é uma combinação de outras ERs.
+  - O mesmo vale para NFAs.  
+
+<div>
+  <img src="./imgs/A05-img01.png" alt="A05-img01" />
+</div>
+
+- Exemplo: ERs para IF, ID, NUM e ERROR
+
+<div>
+  <img src="./imgs/A05-img02.png" alt="A05-img02" />
+</div>
+
+### NFA vs DFA
+
+- DFAs são facilmente simuláveis por programas de computador.  
+- NFAs são mais complexos, pois o programa teria que "adivinhar" o melhor caminho em alguns momentos.  
+- Outra alternativa seria tentar todas as possibilidaeds.
+
+<div>
+  <img src="./imgs/A05-img03.png" alt="A05-img03" />
+</div>
+
+### ε-Closure
+
+- Edge(s,c): todos os estados alcançáveis a partir de s, consumindo c.  
+- Closure(S): todos os estados alcançáveis a partir do conjunto S, sem consumir caractere de entrada.  
+- Closure(S) é o menor conjunto T, tal que:  
+
+<div>
+  <img src="./imgs/A05-img04.png" alt="A05-img04" />
+</div>
+&nbsp;
+
+### Algoritmo
+
+<div>
+  <img src="./imgs/A05-img05.png" alt="A05-img05" />
+</div>
+
+<div>
+  <img src="./imgs/A05-img06.png" alt="A05-img06" />
+</div>
+&nbsp;
+
+### Convertendo NFA em DFA
+
+- Manipular esses conjuntos de estados é muito caro durante a simulação.  
+- Solução:
+  - Calcular todos eles antecipadamente.  
+- Isso converte um NFA em um DFA!
+  - Cada conjunto de estados no NFA se torna um estado no DFA. 
+
+#### Algoritmo
+
+<div>
+  <img src="./imgs/A05-img07.png" alt="A05-img07" />
+</div>
+
+- O estado _d_ é final se qualquer um dos estados de `states[d]` for final.
+- Pode haver vários estados finais em `states[d]`.  
+  - `d` será anotado com o token que ocorrer primeiro na especificação léxica (ERs) => Regra de prioridade.
+- Ao final
+  - Descartar `states[]` e usar `trans[]` para análise léxica.
+
+<div>
+  <img src="./imgs/A05-img08.png" alt="A05-img08" />
+</div>
+
+- Esse é o menor autômato possível para essa linguagem?  
+  - Não.
+  - Existem estados que são equivalentes.  
+- Quais estados são equivalentes no autômato acima?
+- Como encontrar estados equivalentes?  
+  - `trans[s1,c] = trans[s2,c]` para todo `c`. -> Isso não é suficiente!
+  - _S1_ e _S2_ são equivalentes quando o autômato aceita σ começando em _S1_ sse ele também aceita σ começando em _S2_.
 
 ---
