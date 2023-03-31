@@ -510,3 +510,383 @@ Resolução:
 - Pilha da Internet não contém essas camadas.
   - estes serviços, se necessários, devem ser implementados na aplicação.
 ---
+## Aula 04 - 30.03.2023
+
+## Camada de Aplicação  
+
+### Algumas aplicações de rede
+
+- e-mail
+- web
+- mensagem instantânea
+- Login remoto
+- Compartilhamento de arquivos P2P
+- Jogos em rede multiusuários
+- Clipes de vídeo armazenaods em fluxo contínuo  
+- Redes sociais
+- Voice over IP
+- Videoconferência em tempo real
+- Computação em grade
+
+### Criando uma aplicação de rede  
+
+- **Escreva programas que**  
+  - Executem em (diferentes sistemas finais).  
+  - Se comuniquem pela rede.  
+  - Ex.: software de servidor Web se comunica com software de navegador Web.  
+- **Não é preciso escrever software e para dispositivos do núcleo da rede**  
+  - Dispositivos do núcleo da rede não executam aplicações do usuário.  
+  - As aplicações nos sistemas finais permitem rápido, desenvolvimento e propagação.
+
+### Arquiteturas de aplicação  
+1. Cliente-servidor
+    - Incluindo centros de dados/cloud computing
+1. Peer-to-peer (P2P)  
+1. Híbrida de cliente-servidor e P2P  
+
+### Arquitetura cliente-servidor  
+- **Servidor**
+  - Hospedeiro sempre ligado.
+  - Endereço IP permanente.
+  - Server farms por expansão.  
+- **Clientes**
+  - Comunicam-se com o servidor.  
+  - Podem estar conectados intermitentemente.  
+  - Podem ter endereços IP dinâmicos.  
+  - Não se comunicam diretamente entre si.  
+
+  <div>
+    <img src="./img/A04-img01.png" alt="A04-img01"/>
+  </div>
+
+### Arquitetura P2P pura  
+
+- Nenhum servidor sempre ligado.  
+- Sistemas finais arbitrários se comunicam diretamente.  
+- Pares são conectados intermitentemente e mudam endereços IP.  
+- **Altamente escalável, mas difícil de administrar**  
+
+  <div>
+    <img src="./img/A04-img02.png" alt="A04-img02"/>
+  </div>
+
+### Híbrido de cliente-servidor e P2P  
+
+- **Skype**  
+  - Aplicação P2P voice-overIP.  
+  - Servidor centralizado: achando endereço da parte remota.  
+  - Conexão cliente-cliente: direta (não através de servidor).  
+- **Mensagem Instantânea**  
+  - Bate-papo entre dois usuários é P2P.  
+  - Serviço centralizado: detecção/localização da presença do cliente.  
+    - Usuário registra seu endereço IP com servidor central quando entra on-line.  
+    - Usuário contacta servidor central para descobrir endereços IP dos parceiros.  
+
+### Processos se comunicando  
+- **processo**: Programa rodando dentro de um hospedeiro.
+  - No mesmo hospedeiro, dois processos se comunicam usando a **comunicação entre processos** (definida pelo SO).  
+  - Processos em hospediros diferentes se comunicam trocando **mensagens**.  
+- **processo cliente**: Processo que inicia a comunicação.  
+- **Processo servidor**: Processo que espera para ser contactado.  
+- Nota: aplicações com arquiteturas P2P têm processos clientes & processos servidores.  
+
+### Sockets  
+
+- Processo envia/recebe mensagens de/para seu **socket**.  
+- Socket semelhante à porta.  
+  - Processo enviando empurra mensagem pela porta.  
+  - Processo envinado conta com infraestrtura de transporte no outro lado da porta.
+    - Essa estrutra leva a mensagem ao socket no processo receptor.
+  
+  <div>
+    <img src="./img/A04-img03.png" alt="A04-img03"/>
+  </div>  
+
+### Endereçando processos  
+
+- Para receber mensagens, processo deve ter **identificador**.  
+- Dispositivo hospedeiro tem endereço IP exclusivo de 32 bits.  
+- Pergunta: Basta o endereço IP do hospedeiro em que o processo é executado para identificar o preocesso?
+  - Resposta: Não. Muitos processos podem estar rodando no mesmo hospedeiro.  
+- **Identificador** inclui **endereço IP** e **números de porta** associados ao processo no hospedeiro.  
+- Exemplos de número de porta:  
+  - servidor HTTP: 80  
+  - servidor de correio: 25
+
+### Definição de protocolo da camada de aplicação  
+
+- Tipos de mensagens trocadas.  
+  - Ex.: requisição, resposta.  
+- Sintaxe da mensagem:  
+  - que campos nas mensagens & como os campos são delineados.  
+- Semântica da mensagem.  
+  - Significado da informação nos campos.  
+- Regras de quando e como processos enviam & respondem a mensagens.  
+-  **Protocolos de domínio público**
+  - definidos em RFCs.
+  - provê interoperabilidade.  
+  - Ex.: HTTP, SMTP, BitTorrent.
+- **Protocolos proprietários**  
+  - Ex.: Sjype, ppstream.
+
+### Que serviço de transporte uma aplicação precisa?  
+
+- **Perda de dados**
+  - Algumas aplicações podem tolerar alguma perda (Ex.: Áudio).
+  - Outras aplicações exigem transferência de dados 100% confiável (Ex.: Transferência de arquivos).
+- **Temporização**
+  - Algumas aplicações exigem pouco atraso para serem "eficazes" (Ex.: Jogos interativos).
+- **Vazão**
+  - Algumas aplicações exigem um mínimo de vazão para serem "eficazes" (Ex.: multimídia).
+  - Outras aplicações utilizam qualquer vazão que receberem (Ex.: Aplicações elásticas).
+- **Segurança**
+  - Criptografia, integridade de dados, etc.
+
+### Requisitos de serviço de transporte das aplicações comuns  
+
+  <div>
+    <img src="./img/A04-img04.png" alt="A04-img04"/>
+  </div>  
+&nbsp;
+
+### Serviços de protocolos de transporte da Internet  
+
+- **serviço TCP**
+  - Orientada a conexão  
+    - Preparação exigida entre processos cliente e servidor.
+  - Transporte confiável  
+    - Entre processo emissor e receptor.
+  - Controle de fluxo  
+    - Emissor não sobrecarrega receptor.
+  - Controle de congestionamento
+    - Regula emissor quando a rede está sobrecarregada.
+  - Não oferece  
+    - Temporização, garantias mínimas de vazão, segurança.
+- **serviço UDP**  
+  - Transferência de dados não confiável entre processo emissor e receptor.  
+  - Não oferece: preparação da conexão, confiabilidade, controle de fluxo, controle de congestionamento, temporização, garatia de vazão ou segurança.  
+
+### Aplicações da Internet: aplicação protocolos de transporte
+
+  <div>
+    <img src="./img/A04-img05.png" alt="A04-img05"/>
+  </div>  
+&nbsp;
+
+### Web e HTTP  
+
+- **Primeiro, algum jargão**  
+  - **página Web** consiste em **objetos**.  
+  - Objetos pode ser arquivo HTML, imagem JPEG, applet Java, arquivo de áudio, ...  
+  - Página Web consiste em arquivo HTML básico que inclui vários objetos referenciados.  
+  - Cada objeto é endereçável por um **URL**.  
+  - Exemplo de URL: `www.someschool.edu/someDept/pic.gif`  
+    - `www.someschool.edu` -> nome do hospedeio.  
+    - `/someDept/pic.gid` -> Nome do caminho.  
+
+### Visão geral do HTTP  
+
+- **HTTP: HyperText Transfer Protocol**  
+  - Protocolo da camda de aplicação da Web.  
+  - modelo cliente/servidor.  
+    - **cliente**: navegador que requisita, recebe, "exibe" objetos web.  
+    - **servidor**: servidor web envia objetos em resposta a requisições.  
+  <div>
+    <img src="./img/A04-img06.png" alt="A04-img06"/>
+  </div> 
+
+  - **Usa TCP**
+    - Cliente inicia conexão TCP (cria socket) com serviddor, porta 80.  
+    - Servidor aceita conexão TCP do cliente.  
+    - Mensagens HTTP (do protocolo da camada de aplicação) trocadas entre navegador (cliente HTTP) e servidor Web (servidor HTTP).  
+    - Conexão TCP fechada.  
+  - **HTTP** é "sem estado".  
+    - servidor não guarda informações sobre requisições passadas do cliente.  
+  - Protocolos que mantêm "estado" são complexos!  
+    - história passada (estado) deve ser mantida.  
+    - se servidor/cliente falhar, suas visões do "estado" podem ser incoerentes, devem ser reconciliadas.  
+
+### Conexões HTTP  
+
+1. **HTTP não persistente**
+  - No máximo um objeto é enviado por uma conexão TCP.
+1. **HTTP persistente**  
+  - Múltiplos objetos podem ser enviados por uma única conexão TCP entre cliente e servidor.  
+
+### HTTP não persistente  
+
+- Suponha que o usuário digite o URL `www.someSchool.edu/someDepartament/home.index` (contém texto e referência a 10 imagens JPEG).  
+
+1. Cliente HTTP inicia conexão TCP com servidor HTTP (processo) em `www.someSchool.edu` na porta 80
+1. Servidor HTTP no hospedeiro `www.someSchool.edu` espera conexão TCP na porta 80. "aceita" conexão, notificando cliente.  
+1. Cliente HTTP envia **mensagem de requisição** HTTP (contendo URL) pelo socket de conexão TCP. Mensagem indica que cliente deseja o objeto `someDepartament/home.index`.  
+1. Servidor HTTP recebe mensagem de requisição, forma **mensagem de resposta** contendo objeto requisitado e envia mensagem para seu socket.  
+1. Servidor HTTP fecha conexão TCP.  
+1. Cliente HTTP recebe mensagem de resposta contendo arquivo html, exibe html. Analisando arquivo html, acha 10 objetos JPEG referenciados.  
+1. Etapas 1-5 repetidas para cada um dos 10 objetos JPEG.  
+
+#### Tempo de resposta  
+- **Definição de RTT**: tempo para um pequeno pacote trafegar do cliente ao servidor e retornar.  
+- **Tempo de resposta**:
+  - Um RTT para iniciar a conexão TCP.  
+  - Um RTT para a requisição HTTP e primeiros bytes da resposta HTTP retornarem.  
+  - Tempo de transmissão de arquivo.  
+- **Total = 2RTT + tempo de transmissão**  
+
+<div>
+  <img src="./img/A04-img07.png" alt="A04-img07"/>
+</div>  
+&nbsp;
+
+### HTTP Persistente  
+
+- **Problemas do HTTP não persistente**  
+  - Requer 2 RTTs por objeto.  
+  - Overhead do SO para cada conexão TCP.  
+  - Navegadores geralmente abrem conexões TCP paralelas para buscar objetos referenciados.  
+- **HTTP persistente**
+  - Servidor deixa a conexão aberta depois de enviar a resposta.  
+  - Mensagens HTTP seguintes entre cliente/servidor enviadas pela conexão aberta.  
+  - Cliente envia requisições assim que encontra um objeto referenciado.  
+  - No mínimo um RTT para todos os objetos referenciados.
+
+### Mensagem HTTP  
+- Dois tipos de mensagens HTTP: **requisição** e **resposta**.  
+- **Mensagem de requisição HTTP:**  
+  - ASCII (formato de texto legível)  
+  <div>
+    <img src="./img/A04-img08.png" alt="A04-img08"/>
+  </div>  
+#### Formato geral
+  <div>
+    <img src="./img/A04-img09.png" alt="A04-img09"/>
+  </div>  
+&nbsp;
+
+#### Upload da entrada do formulário  
+
+- **método POST**
+  - Página Web geralmente inclui entrada do formulário.  
+  - Entrada é enviada ao servidor no corpo da entidade.
+- **método do URL**  
+  - Usa o método GET.
+  - Entrada é enviada no campo de URL da linha de requisição.
+
+### Tipos de método  
+
+- **HTTP/1.0**
+  1. GET
+  1. POST
+  1. HEAD
+      - Pede ao servidor para deixar o objeto requisitado fora da resposta.
+- **HTTP/1.1**
+  1. GET; POST; HEAD
+  1. PUT
+      - Envia arquivo no corpo da entidade ao caminho especificado no campo de URL.  
+  1. DELETE  
+      - Exclui arquivo especificado no campo de URL;  
+
+### Mensagem de resposta HTTP  
+
+  <div>
+    <img src="./img/A04-img10.png" alt="A04-img10"/>
+  </div>  
+&nbsp;
+
+### Códigos de estado da resposta HTTP  
+
+- Exemplos da primeira linha da mensagem de resposta:  
+  - 100 Continue
+    - Pedido incompleto recebido, pode eviar o resto do pedido.
+  - 200 Ok
+    - Requisição bem-sucedida, objeto requisitado mais adiante.
+  - 301 Moved Permanently  
+    - Objeto requisitado movido, novo local especificado mais adiante na mensagem (cabeçalho Location)
+  - 400 Bad Request  
+    - Mensagem de requisição não entendida pelo servidor.
+  - 404 Not Found  
+    - Documento requisitado não localizado neste servidor.
+  - 505 HTTP Version Not Supported  
+    - Solicitação usa versão HTTP não suportada.
+
+### Estado usuário-servidor: cookies  
+
+- Nuitos sites importantes usam cookies.  
+- **Quatro componentes**  
+  1. Linha de cabeçalho de cookie da mensagem de resposta HTTP.  
+  1. Linha de cabeçalho de cookie na mensagem de requisição HTTP.  
+  1. Arquivo de cookie na máquina do usuário, controlado pelo navegador do usuário.  
+  1. Banco de dados de apoio no site web.  
+- **Exemplo**  
+  - Susana sempre acessa a Internet pelo PC.
+  - Visita um site de comércio eletrônico pela primeira vez.  
+  - Quando as primeiras requisições HTTP chegam ao site, este cria:  
+    - ID exclusivo.
+    - Entrada no banco de dados de apoio para o ID.  
+
+<div>
+  <img src="./img/A04-img11.png" alt="A04-img11"/>
+</div>  
+
+- **O que os cookies podem ter**
+  - Autorização
+  - Carrinhos de compras
+  - Recomendações
+  - Estado da sessão do usuário (e-mail da Web)
+- **Como manter o "estado"**  
+  - Extremidades do protocolo: mantêm estado no emissor/receptor por múltiplas transações.  
+  - cookies: mensagens HTTP transportam estado.  
+- **Cookies e privacidade**
+  - cookies permitem que os sites descubram muito sobre você.  
+  - você pode fornecer nome e e-mail aos sites.  
+
+### Caches Web (Servidor Proxy)  
+
+- **Objetivo:** satisfazer a requisição do cliente sem envolcer servidor de origem.  
+  - Usuário prepara navegador: acesso à Web via cache.  
+  - Navegador envia todos as requisições HTTP ao cache.  
+    - Objeto no cache: cache retorna objeto.  
+    - Ou cache requisita objeto do servidor de origem, depois retorna objeto ao    cliente.  
+<div>
+  <img src="./img/A04-img12.png" alt="A04-img12"/>
+</div>
+&nbsp;
+
+### Mais sobre cache web  
+
+- Cache atua como cliente e servidor.  
+- Normalmente, cache é instalado por ISP (da universidade, empresa, residencial).  
+- **Por que caching Web?**  
+  - Reduz tempo de resposta à requisição do cliente.  
+  - Reduz tráfego no enlace de acesso de uma instituição.  
+  - Internet densa com caches:  
+    - Permitem que provedores de conteúdo "fracos" renetan conteúdo efetivamente (mas o mesmo ocorre com compartilhamento de arquivos P2P).
+
+<div>
+  <img src="./img/A04-img13.png" alt="A04-img13"/>
+</div>
+<div>
+  <img src="./img/A04-img14.png" alt="A04-img14"/>
+</div>
+<div>
+  <img src="./img/A04-img15.png" alt="A04-img15"/>
+</div>  
+
+### GET condicional  
+
+- **Objetivo:** não enviar objeto se o cache tiver versão atualizada.  
+- Cache: especifica data da cópia em cache na requisição HTTP.
+  ```
+  If-modified-since:  
+    <data>
+  ```  
+- Servidor: resposta não contém objeto se a cópia em cache estiver atualizado:  
+  ```
+  HTTP/1.0 304 Not
+    Modified
+  ```
+<div>
+  <img src="./img/A04-img16.png" alt="A04-img16"/>
+</div>
+
+---
