@@ -333,9 +333,196 @@ Novos dados -> Modelo preditivo -> Predição
 
 ## Classificação e Árvore de decisão  
 
+### Abordagem geral de resolução de um problema de classificação
+
+<div>
+    <img src="./imgs/Aula04-img01.png" alt="Aula04-img01"/>
+</div> 
+&nbsp;
+
 ### Árvore de decisão
+- Exemplo: classificação de espécie de flores.  
+  <div>
+      <img src="./imgs/Aula04-img02.png" alts="Aula04-img02"/>
+  </div> 
+
+  <div>
+      <img src="./imgs/Aula04-img03.png" alts="Aula04-img03"/>
+  </div> 
+
 - Temos
   - Nó raiz
   - Nós internos
-  - Nós folhas
+  - Nós folhas  
+- Um mesmo conjunto de dados pode gerar diferentes árvores.  
+
+  <div>
+      <img src="./imgs/Aula04-img04.png" alts="Aula04-img04"/>
+  </div>   
+  &nbsp;
+
+### Aplicando modelo aos dados de teste  
+
+<div>
+    <img src="./imgs/Aula04-img05.png" alts="Aula04-img05"/>
+</div>   
+&nbsp;
+<div>
+    <img src="./imgs/Aula04-img06.png" alts="Aula04-img06"/>
+</div>   
+&nbsp;
+
+### Classificação com árvore de decisão  
+ - Algoritmos:  
+   - **Hunt's Algorithm** (o primeiro algoritmo).  
+   - CART
+   - ID3, C4.5
+   - SLIQ, SPRINT  
+
+### Algoritmo de Hunt - Estrutura Geral  
+
+- Seja Dt o conjunto de registros de treino no nó Dt.  
+  - Se Dt contém registros pertencentes a uma mesma classe yt, então o nó folha recebe a label yt.  
+  - Se Dt contém registros que pertencem a uma ou mais classes, usamos um atributo para dividir os dados em subconjuntos menores (que gerarão novos nós).  
+  - Aplicar o procedimento recursivamente a cada subconjunto obtido.  
+
+<div>
+    <img src="./imgs/Aula04-img07.png" alts="Aula04-img07"/>
+    <img src="./imgs/Aula04-img08.png" alts="Aula04-img08"/>
+    <img src="./imgs/Aula04-img09.png" alts="Aula04-img09"/>
+</div>   
+&nbsp;
+
+- Seja Dt o conjunto de registros de treino no nó Dt:  
+  - Caso 01: Dt contém registros pertencentes a uma mesma classe yt. Então o nó folha recebe a label yt.  
+  - Caso 02: Dt contém registros que pertencem a uma ou mais classes, usamos um atributo para dividir os dados em subconjuntos menores (que gerarão novos nós).  
+
+### Questões para construção da árvore de decisão
+
+- Como os registros de treinamento devem ser divididos?  
+  - Método para especificar **condição de teste** dependendo dos tipos de atributo.  
+  - Medida para avaliar a **qualidade de uma condição** de teste.  
+- Quando o procedimento de divisão deve parar?  
+  - Pare de dividir se todos os registros pertecerem à **mesma classe** ou tiverem valores de atributo idênticos.  
+  - Parada **antecipada**.  
+
+### Condições de teste
+- Tipos de atributos
+  - binário
+  - nominal
+  - ordinal
+  - contínuo
+- Número de splits
+  - 2-way split
+  - Multi-way split
+
+<div>
+    <img src="./imgs/Aula04-img10.png" alts="Aula04-img10"/>
+    <img src="./imgs/Aula04-img11.png" alts="Aula04-img11"/>
+</div>   
+&nbsp;
+
+### Condições de teste - Atributos continuous  
+
+<div>
+  <img src="./imgs/Aula04-img12.png" alts="Aula04-img12"/>
+</div>
+&nbsp;  
+
+### Determinando a melhor divisão  
+
+- Qual a melhor condição de teste?  
+  <div>
+    <img src="./imgs/Aula04-img13.png" alts="Aula04-img13"/>
+  </div>
+  <div>
+    <img src="./imgs/Aula04-img14.png" alts="Aula04-img14"/>
+  </div>
+  &nbsp;  
+
+- **Algoritmo guloso**
+  - Preferência a nós mais **puros**.  
+- Necessita de uma medida de impureza.
+  <div>
+    <img src="./imgs/Aula04-img15.png" alts="Aula04-img15"/>
+  </div>
+  &nbsp;  
+
+### Medidas para determinar a pureza de um nó
+<div>
+  <img src="./imgs/Aula04-img16.png" alts="Aula04-img16"/>
+</div>
+&nbsp;  
+
+### Comparação para um problema de classificação binária  
+<div>
+  <img src="./imgs/Aula04-img17.png" alts="Aula04-img17"/>
+</div>
+<div>
+  <img src="./imgs/Aula04-img18.png" alts="Aula04-img18"/>
+</div>
+&nbsp;  
+
+### Determinando a melhor divisão  
+
+- Qual atributo escolher e qual o valor de particionamento?  
+- Esses valores geram nós puros?  
+- Ideia: comparar o grau de impureza do nó pai com o grau de impureza dos nós filhos.
+1. Calcule a medida de impureza (P) antes de dividir.  
+1. Calcular a medida de impureza (M) após a divisão.  
+1. Calcule a medida de impureza de cada nó filho.  
+1. M é a impureza ponderada dos filhos.  
+1. Escolha a condição de teste de atributo que produz o maior ganho `Grain = P - M` ou equivalentemente, medida de impureza mais baixa após a divisão (M).  
+
+### Medida de impureza: Gini Index  
+
+- Índice de Gini para um determinado nó t:  
+<div>
+  <img src="./imgs/Aula04-img19.png" alts="Aula04-img19"/>
+</div>
+
+- (NOTA: p(j | t) é a frequência relativa da classe j no nó t).  
+  - Máximo (1 - 1/nc) quando os registros são distribuídos igualmente enre todas as classes, implicando nas informações menos interessantes.  
+  - Mínimo (0, 0) quando todos os registros pertencem a uma classe implicando nas informações mais importantes.
+  - 2-class (p, 1 - p):
+  <div>
+    <img src="./imgs/Aula04-img20.png" alts="Aula04-img20"/>
+  </div>
+
+- Quando um nó p é dividido em k partições (filhos)
+  <div>
+    <img src="./imgs/Aula04-img21.png" alts="Aula04-img21"/>
+  </div>
+- ni = número de registros no filho i, n = número de registros no nó pai p.  
+- Escolha o atributo que minimiza o índice de Gini médio ponderado dos filhos.  
+- O índice de Gini é usado em algoritmos de árvore de decisão, como CART, SLIQ, SPRINT.  
+
+### Medida de impureza: Entropia
+
+<div>
+  <img src="./imgs/Aula04-img22.png" alts="Aula04-img22"/>
+</div>
+
+- Máximo (log nc) quando os registros são igualmente distribuídos entre todas as classes, implicando menos informações.  
+- Mínimo (0, 0) quando todos os registros pertecem a uma classe, implicando na maioria das informações.  
+
+### Ganho de informação  
+<div>
+  <img src="./imgs/Aula04-img23.png" alts="Aula04-img23"/>
+</div>
+
+- Escolha a divisão que maximiza GANHO.  
+- Usado nos algoritmos de árvore de decisão ID3 e C4.5
+
+### Erro de classificação
+<div>
+  <img src="./imgs/Aula04-img24.png" alts="Aula04-img24"/>
+</div>
+
+- Máximo (1 - 1/ nc) quando os registros são distribuídos igualmente entre todas as classes, implicando nas informações menos interessantes.  
+- Mínimo (0) quando todos os registros pertencem a uma classe, implicando nas informações mais interessantes.
+    
+
+
+
 ---
