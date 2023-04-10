@@ -198,3 +198,59 @@ export default FuncaoA;
 - É um React Hook que permite que você leia e assine o contexto de seu componente.
 - Chame `useContext` no nível superior do seu componente para ler e assinar o contexto.
 - `SomeContext`: O contexto que você criou anteriormente com createContext. O contexto em si não contém as informações, apenas representa o tipo de informação que você pode fornecer ou ler dos componentes.
+
+---
+
+## Aula 05 - 05.03.2023
+
+<div align="center">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm0MoDAPkpKS48D5bIdyedYRxDgDbh-w2QTAvui9jWcxRlaqEv8aoB4qDnBkIuFGylxsg&usqp=CAU" alt="Local Stroge VS Session Storage"/>
+</div>
+
+### Local Storage VS Session Storage
+- No navegador, temos dois locais onde podemos guardar dados do tipo string a partir de uma chave criada (também do tipo string). São eles:
+- O que diferencia **Local Storage** de **Session Storage** é o tempo em que os dados ficam armazenados.
+- Exemplo - Utilizando sessionStorage:
+
+```JavaScript
+const aluno = {
+            matricula:"00111",
+            nome:"Jefferson",
+            curso:"Sistemas de Informação"
+        }
+
+sessionStorage.setItem(aluno.matricula, JSON.stringify(aluno))
+```
+- Nomenclatura: `sessionStorage.setItem(key: string, data: string)`  
+- **Session Storage**  
+  - Armazena os dados durante a sessão do usuário no navegador (enquanto a aba ou a janela estiver ativa).
+  - Quando a sessão é encerrada, os dados são atumaticamente apagados.  
+- **Local Storage**
+  - Permite armazenar dados no navegador de forma permanente, mesmo depois que o usuário fecha o navegador.  
+  - Os dados que estarão armazenados no Local Storage estarão disponíveis mesmo depois que o usuário fechar o navegador.  
+
+### Use State (Hook)
+- `useState` é um React Hook (declarado no nível do topo do componente) que permite adicionar uma variável de estado ao seu componente.  
+
+#### Parâmetros
+- `initialState`: O valor inicial desejado para o estado.  
+  - Pode ser um valor de qualquer tipo.
+  - Uma função pode ser passada como estado inicial, nesse caso, ele será tratada como uma função inicializadora (deve ser puro, não deve ter argumentos e deve retornar um valor de qualquer tipo).
+  - A função inicializadora é chamada ao inicializar o componente. O valor de retorno é armazenado como estado inicial.
+
+#### Retorno
+- Um array com exatamente dois valores:
+  - O estado atual.
+  - A função _set_ que permite atualizar o estado para um valor diferente e acionar uma nova renderezação (Você pode passar o próximo estado diretamente ou uma função que o calcula a partir do estado anterior:).
+
+### Use Effect (Hook)
+- `useEffect` é um React Hook que permite sincronizar um componente com um sistema externo.
+  - Deve ser chamado no topo do componente.  
+
+#### Parâmetros  
+- `setup`: A função com a lógica do seu efeito.
+- `dependencies` (opcional): Lista de todos os valores relativos referenciados dentro do código de configuração.
+  - Esses valores incluem props, state e todas as variáveis e funções declaradas diretamente dentro do corpo do componente.  
+
+#### Retorno
+- `useEffect` retorna `undefined`.
