@@ -510,9 +510,7 @@ Resolução:
 - Pilha da Internet não contém essas camadas.
   - estes serviços, se necessários, devem ser implementados na aplicação.
 ---
-## Aula 04 - 30.03.2023
-
-## Camada de Aplicação  
+## Aula 04 - Camada de Aplicação - 30.03.2023
 
 ### Algumas aplicações de rede
 
@@ -888,5 +886,358 @@ Resolução:
 <div>
   <img src="./img/A04-img16.png" alt="A04-img16"/>
 </div>
+&nbsp;
+
+## Aula 05 - Camada de Aplicação - 31.03.2023
+
+### FTP: o protocolo de transferência de arquivos
+
+<div>
+  <img src="./img/A05-img01.png" alt="A05-img01"/>
+</div>
+
+- Transfere arquivo de/para hospedeiro remoto.  
+- Modelo cliente/servidor.
+  - **cliente**: lado que inicia transferência (de/para remoto).  
+  - **servidor**: hospedeiro remoto.  
+- FTP: RFC 959
+- servidor FTP: porta 21.
+
+### FTP: Conexões separadas para controle e dados
+- Cliente FTP contacta servidor FTP na porta 21 (TCP é o protocolo de transporte).  
+- Cliente autorizado por conexão de controle.  
+- Cliente navega por diretório remoto enviando comandos por conexão de controle.  
+- Quando servidor recebe comando de transferência de arquivo, abre 2° conexão TCP (para arquivo) com cliente.  
+- Após transferir um arquivo, servidor fecha conexão de dados.
+
+<div>
+  <img src="./img/A05-img02.png" alt="A05-img02"/>
+</div>
+
+- Servidor abre outra conexão de dados TCP para transferir outro arquivo.  
+- Conexão de controle: **"fora da banda"**
+- Servidor FTP mantém "estado": diretório atual. autenticação anterior.   
+
+### Comandos e respostas FTP
+
+- **Exemplos de comandos**
+  - Enviado como texto ASCII pelo canal de controle.
+  - `USER nome-usuário`
+  - `PASS senha`
+  - `LIST` retorna lista de arquivos no diretório atual.  
+  - `RETR nome-arquivo` recupera (apanha) arquivo.  
+  - `STOR nome-arquivo` armazena (coloca) arquivo no hospedeiro remoto.
+- **Exemplos de códigos de retorno**  
+  - Código e frases de estado (como no HTTP).
+  - `331 Username Ok, password required`
+  - `125 data connection already open;`
+  - `425 Can't open data connection`
+  - `452 Error writing file`  
+
+### Correio eletrônico  
+
+&nbsp;
+<div>
+  <img src="./img/A05-img03.png" alt="A05-img03"/>
+</div>
+
+- **Três componentes principais:**
+  - Agentes de usuário.
+  - Servidores de correio.
+  - Simple Mail Transfer Protocol: SMTP  
+- **Agente do usuário**
+  - Também chamado "leitor de correio"
+  - redigir, editar, ler mensagens de correio eletrônico.  
+  - Ex.: Eudora, Outlook, elm, Mozila Thunderbird.  
+  - Mensagens entrando e saindo armazenadas no servidor.  
+
+### Correio eletrônico: Servidores de correio
+- **Caixa de correio** contém mensagens que chegam para o usuário.  
+- **Fila de mensagens** com mensagens de correio a serem enviadas.  
+- **Protocolo SMTP** entre servidores de correio para enviar mensagens de e-mail.  
+  - Cliente: servidor de envio de correio.  
+  - "Servidor": servidor de recepção de correio.  
+
+### Correio eletrônico: SMTP [RFC 2821]  
+- Usa TCP para transferir de modo confiável a mensagem de e-mail do cliente ao servidor, porta 25.  
+- Transferência direta: servidor de envio ao servidor de recepção.  
+- Três fases da transferência.  
+  - Handshaking (saudação).
+  - Transferência de mensagens.  
+  - Fechamento.  
+- Interação comando/resposta.  
+  - **comandos**: texto ASCII.
+  - **resposta**: código e frase de estado.  
+- Mensagens devem estar em ASCII de 7 bits.  
+
+### Cenário: Alice envia mensagem a Bob
+
+&nbsp;
+<div>
+  <img src="./img/A05-img04.png" alt="A05-img04"/>
+</div>
+
+1. Alice usa AU para redigir mensagem "para" `bob@algumaescola.edu`.
+1. O AU de Alice envia mensagem ao seu servidor de correio, que é colocada na fila de mensagens.  
+1. Lado cliente do SMTP abre conexão TCP com servidor de correio de Bob.  
+1. Cliente SMTP envia mensagem de Alice pea conexão TCP.  
+1. Servidor de correio de Bob coloca mensagem na caixa de correio de Bob.  
+1. Bob chama seu agente do usuário para ler mensagem.  
+
+### Exemplo de interação SMTP  
+
+```
+S: 220 hamburger.edu
+C: HELO crepes.fr
+S: 250 Hello crepes.fr, pleased to meet you
+C: MAIL FROM: <alice@crepes.fr>
+S: 250 alice@crepes.fr... Sender ok
+C: RCPT TO: <bob@hamburger.edu>
+S: 250 bob@hamburger.edu ... Recipient ok
+C: DATA
+S: 354 Enter mail, end with "." on a line by itself
+C: Você gosta de ketchup?
+C: Que tal picles?
+C: .
+S: 250 Message accepted for delivery
+C: QUIT
+S: 221 hamburger.edu closing connection
+```  
+
+### SMTP: palavras finais  
+
+- SMTP usa conexões persistentes.  
+- SMTP requer que a mensagem (cabeçalho e corpo) esteja em ASCII de 7 bits.  
+- Servidor SMTP usa `CRLF.CRLF` para determinar fim da mensagem.  
+- **Comparação com HTTP**
+  - HTTP: puxa.
+  - SMTP: empurra.  
+  - ambos têm interação de comando/resposta em ASCII, códigos de estado.  
+  - HTTP: cada objeto encapsulado de resposta.  
+  - SMTP: múltiplos objetos enviados na mensagem multiparte.  
+
+### Formato da mensagem de correio  
+- SMTP: protocolo para trocar mensagens de e-mail.  
+- RFC 822: padrão para formato de mensagem de texto:  
+  - Linhas de cabeçalho, Ex.:  
+    - Para:
+    - De:
+    - Assunto:
+  - **diferente** dos comandos SMTP!  
+  - Corpo
+    - A "mensagem", apenas em caracteres ASCII.
+
+<div>
+  <img src="./img/A05-img05.png" alt="A05-img05"/>
+</div>  
+&nbsp;
+
+### Protocolos de acesso de correio
+
+&nbsp;
+<div>
+  <img src="./img/A05-img06.png" alt="A05-img06"/>
+</div>
+
+- SMTP: remessa/armazenamento no servidor do receptor.  
+- protocolo de acesso ao correio: recuperação do servidor
+  - POP: Post Office Protocol [RFC 1939]
+    - autorização (agente <--> servidor) e download.
+  - IMAP: Internet Mail Access Protocol [RFC 1730]
+    - Mais recursos (mais complexo).
+    - manipulação de mensagens armazenadas no servidor.
+  - HTTP: gmail, Hotmail, Yahoo, Mail, etc.
+
+### Protocolo POP3
+
+- **Fase de autorização**
+  - Comandos do cliente:
+    - `user`: declare "username"
+    - `pass`: senha
+  - Respostas do servidor:
+    - `+OK`
+    - `-ERR`
+  ```
+  S: +OK POP3 server ready
+  C: user bob
+  S: +OK
+  C: pass hungry
+  S: +OK usuário logado com sucesso
+  ```
+
+- **Fase de transação (cliente)**
+  - `list`: lista números de mensagens.  
+  - `retr`: recupera mensagens por número.  
+  - `dels`: excluir.  
+  - `quit`  
+  ```
+  C: list
+    S: 1 498
+    S: 2 912
+    S: .
+    C: retr 1
+    S: <message 1 contents>
+    S: .
+    C: dele 1
+    C: retr 2
+    S: <message 1 contents>
+    S: .
+    C: dele 2
+    C: quit
+    S: +OK serv. POP3 desconectando
+  ```  
+- **Mais sobre POP3**
+  - Exemplo anterior usa modo "download e excluir".  
+  - Bob não pode reler e-mail se mudar o cliente.  
+  - "Download-e-manter": cópias de mensagens em clientes diferentes.  
+  - POP3 é sem estado entre as sessões.  
+
+### IMAP
+
+- Mantém todos as mensagens em um local: o servidor.  
+- Permite que o usuário organize mensagens em pastas.  
+- Mantém estado do usuário entre sessões:
+  - Nomes de pastas e mapeamento entre IDs de mensagem e nome de pasta.  
+
+### DNS: Domain Name System  
+- Como mapear entre endereço IP e nome?  
+- **DNS**
+  - Banco de dados distribuído implementado na hierarquia de muitos **servidores de nomes**.  
+  - **Protocolo em nível de aplicação** -> hospedeiro, roteadores, servidores de nomes se comunicam para resolver nomes (tradução endereço/nome)
+    - Nota: função básica da Internet, implementada como protocolo em nível de aplicação.  
+    - Complexidade na "borda" da rede.  
+- **Serviços de DNS**  
+  - tradução nome de hospedeiro -> endereço IP.
+  - Apelidos de hospedeiro  
+    - nomes canônicos.  
+  - Apelidos de servidor de correio.  
+  - Distribuição de carga.  
+    - Servidores Web replicados: conjunto de endereços IP para um nome canônico.  
+- **Por que não centralizar o DNS?**  
+  - único ponto de falha.  
+  - volume de tráfego.  
+  - banco de dados centralizado distante.  
+  - manutenção.  
+
+### Banco de dados distribuído, hierárquico  
+
+&nbsp;
+<div>
+  <img src="./img/A05-img07.png" alt="A05-img07"/>
+</div>  
+
+- **Cliente quer IP para www.amazon.com**  
+  - Cliente consulta serv. raiz para achar servidor DNS com.  
+  - Cliente consulta serv. DNS com para obter sev. DNS amazon.com.
+  - Cliente consulta serv. DNS amazon.com para obter endereço IP para www.amazon.com  
+
+### DNS: Servidores de nomes raiz  
+- Contactados por servidores de nomes locais que não conseguem traduzir nome.  
+- Servidores de nomes raiz:  
+  - Contacta servidor de nomes com autoridade se o mapeamento não for conhecido.  
+  - Obtém mapeamento.  
+  - Retorna mapeamento ao servidor de nomes local.  
+
+### TLD e servidores com autirdade
+
+- **Servidores de domínio de alto nível (TLD):**  
+  - Responsável por com, org, net, edu, etc. E todos os domínios de país de alto nível: br, uk, fr, ca, jp.  
+  - A Network Solutions mantém servidores para TLD com.
+  - Educause para TLD edu.
+- **Servidores DNS com autoridade:**
+  - Servidores DNS da organização, provendo nome de hospedeiro com autoridade e mapeamento IP para os servidores da organização (Ex.: Web, correio).  
+  - Podem ser mantidos pela organização ou provedor de serviços.  
+
+### Servidor de nomes local
+- Não pertence estritamente à hierarquia.  
+- Cada ISP (ISP residencial, empresa, universidade) tem um.  
+  - Também chamado "servidor de nomes default".  
+- Quando hospedeiro faz consultas ao DNS, consulta é enviada ao seu servidor DNS local.  
+  - atua como proxy, encaminhando consulta para hierarquia.  
+
+### Exemplo de resolução de nome DNS  
+
+&nbsp;
+<div>
+  <img src="./img/A05-img08.png" alt="A05-img08"/>
+</div>  
+
+- Hospedeiro em cis.poly.edu quer endereço IP para gaia.cs.umass,edu.
+- **Consulta repetida:**
+  - Servidor contactado responde com nome do servidor a contactar.  
+  - "não conheço esse nome, mas pergunte a este servidor".
+- **Consulta recursiva**
+  - Coloca peso da resolução de nome sobre o servidor de nomes contactados.
+  -  Carga pesada?
+
+  &nbsp;
+  <div>
+    <img src="./img/A05-img09.png" alt="A05-img09"/>
+  </div>
+  &nbsp;  
+
+### DNS: caching e atualização de resgistros  
+
+- Quando servidores de nomes descobrem o mapeamento, ele o mantém em _cache_.  
+  - Entradas de cahce esgotam em um tempo limite.  
+  - Servidores TLD normalmente são mantidos em caches nos servidores de nomes locais.
+    - Assim, os servideores de nomes raiz não são consultados com frequência.  
+  - Mecanismo de atualização/notificação em projeto na IETF.
+    - RFC 2136.  
+
+### Registros de DNS
+
+- **DNS**: BD distribuído contendo registros de recursos (RR). 
+<div>
+  <img src="./img/A05-img10.png" alt="A05-img10"/>
+</div>  
+
+- Tipo = A
+  - `nome` é o "hostname".
+  - `valor` é o endereço IP.
+- Tipo = NS
+  - `nome` é o domínio (Ex.: foo.com).
+  - `valor` é o "hostname" do servidor de nomes com autoridade para este domínio.
+- Tipo = CNAME
+  - `nome` é apelido para algum nome "canônico" (real).  
+  - `valor` é o nome canônico
+- Tipo = MX
+  - `valor` é o nome do servidor de correio associado ao nome.  
+
+### Protocolo DNS - mensagens
+
+- **Protocolo DNS**: mensagens de consulta e resposta, ambas com algum formato de mensagem.
+- Cabeçalho da mensagem:
+  - Identificação: # de 16 bits para consulta (resposta usa mesma #).  
+  - Flags:
+    - Consulta ou resposta.  
+    - Recursão desejada.  
+    - Recursão disponível.  
+    - Resposta é com autoridade.  
+
+&nbsp;
+<div>
+  <img src="./img/A05-img11.png" alt="A05-img11"/>
+</div>
+&nbsp;
+
+### Inserindo registros no DNS  
+
+- exemplo: nova empresa “Network Utopia”
+- registre o nome networkuptopia.com na entidade
+registradora de DNS (Ex.: Network Solutions)
+  - Oferece nomes, endereços IP do servidor de nomes com
+autoridade (primário e secundário)
+  - Entidade insere dois RRs no servidor TLD com:
+  ```
+  (networkutopia.com, dns1.networkutopia.com, NS)
+  (dns1.networkutopia.com, 212.212.212.1, A)
+  ```
+- crie registro Tipo A do servidor com autoridade para
+www.networkuptopia.com; registro Tipo MX para
+networkutopia.com
+- Como as pessoas obtêm o endereço IP do seu site?
+
+
 
 ---
