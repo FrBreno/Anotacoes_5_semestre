@@ -172,7 +172,108 @@ lim n→∞ xn = A
 - Um número _x_ pode ser expresso da seguinte maneira:  
 
 <div>
-    <img src="./imgs/A01-img10.png" alt="A01-img10" />
-</div>
+    <img src="./imgs/A02-img01.png" alt="A01-img01" />
+</div>  
+
+- Exemplos:  
+1. 2345.89 = 0.23589 * 10^4
+1. 0.0000586 = 0.586×10^(−4)
+1. −12000 = -0.12 * 10^5
+
+### Conversão da parte fracionária de um número decimal para base 2  
+
+- Para converter a parte fracionária na base 10 para a base 2, começamos com a parte fracinária e multiplicanos por 2, separando a parte inteira da parte fracionária.  
+- Continue esse processo de multiplicação até obter uma parte fracionária resultante igual a zero.  
+- Em seguida, basta escrever as partes inteiras dos resultados de cada multiplicação.  
+- Exemplos:  
+  <div>
+    <img src="./imgs/A02-img02.png" alt="A01-img02" />
+  </div>  
+
+### Erro Absoluto e Erro Relativo  
+
+- Seja x o valor de um número e x¯¯ um valor aproximado de x. O erro absoluto é a diferênça entre o valor exato e o valor aproximado de x.  
+- Dado pela fórmula:  `EAx = x - x¯¯`.   
+- Seja  x  o valor exato de um número e x¯¯ um valor aproximado de  x . O erro realativo é a razão entre o erro absoluto e o valor aproximado de x, dado pela fórmula  `ERx = EAx / x¯¯`.
+
+- Exemplo:  
+  <div>
+    <img src="./imgs/A02-img03.png" alt="A01-img03" />
+  </div>  
+
+- Em muitos casos, o valor exato do número não é conhecido.
+- Contudo, conhecendo o valor de aproximações sucessivas.
+  - Seja x^i e x^(i + 1) valores de duas aproximações para um número exato x. O erro de aproximação é dado por `Erro_aprox = x^(i+1) − x^i`.
+
+### Sistemas de numeração em ponto flutuante  
+
+- Sistemas computacionais representam os números reais por meio de um sistema de numerção em ponto flutuante.
+  - Forma geral: `F(β,p,m,M)`
+    - 
+    - `β` repersenta a base.  
+    - `p` representa a precisão.  
+    - `m` e `M` representam os valores mínimo e máximo que o expoente pode assumir.  
+  - Exemplos:
+  <div>
+    <img src="./imgs/A02-img07.png" alt="A01-img07" />
+  </div>  
+  <div>
+    <img src="./imgs/A02-img08.png" alt="A01-img08" />
+  </div>  
+
+
+### Epsilon da Máquina  
+
+- É definido de forma que 1 + ε seja o menor número representável maior que 1.  
+  - Represintável, mas não existe números representáveis em (1, 1 + ε).  
+
+  ```Python
+  import sys
+  t = 0
+  eps = 1
+  while 1 + eps > 1:
+    eps = eps /2.0
+    t += 1
+  eps = eps*2.0
+
+  print(sys.float_info.epsilon )
+  print(eps)
+  print(t)
+  ```
+  ```
+  2.220446049250313e-16
+  2.220446049250313e-16
+  53
+  ```
+
+### Aritmética de Ponto Flutuante  
+
+#### Soma de dois números ponto flutuante
+
+- Passo para realizar a soma de dois números ponto flutuante:  
+  1. Represente os números a ser somado.  
+  1. Iguale o menor expoente ao maior.
+  1. Some as mantissas.
+  1. Calcule o resultado.  
+  1. Normalize o resultado.  
+  1. Ajuste a precisão do resultado.  
+  1. Realize o arrendodamento se necessário.
+  1. Mostre o resultado final.
+
+  <div>
+    <img src="./imgs/A02-img04.png" alt="A01-img04" />
+  </div>  
+
+### Operações Críticas da soma
+
+- Soma dois números com grandezas muito diferentes.  
+- Geralmente o menor número perde muita precisão pois, nesta situação seus dígitos menos podem ser descartados durante a operação.
+
+<div>
+  <img src="./imgs/A02-img05.png" alt="A01-img05" />
+</div>  
+<div>
+  <img src="./imgs/A02-img06.png" alt="A01-img06" />
+</div>  
 
 ---
