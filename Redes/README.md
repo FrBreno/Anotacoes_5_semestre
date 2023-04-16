@@ -1236,8 +1236,295 @@ autoridade (primário e secundário)
 - crie registro Tipo A do servidor com autoridade para
 www.networkuptopia.com; registro Tipo MX para
 networkutopia.com
-- Como as pessoas obtêm o endereço IP do seu site?
+- Como as pessoas obtêm o endereço IP do seu site?  
+
+## Aula 06 - Camada de Aplicação - 13.04.2023
+
+### Arquitetura P2P pura
+
+- Sem servidor sempre ligado.  
+- Sistemas finais arbitrários se comunicam diretamente.  
+- Pares estão conectados intermitentemnet e mudam de endereços IP.  
+- **Três tópicos:**  
+   - distribuição de arquivos.
+   - Procura de informações.  
+   - Estudo de caso: Skype.  
+
+### Distribuição de arquivo: cliente-servidor VS P2P  
+- **Pergunta:** Quanto tempo para distribuir arquivo de um servidor para N pares?
+<div>
+  <img src="./img/A05-img12.png" alt="A05-img12"/>
+</div>
+&nbsp;
+
+### Tempo de distribuição de arquivo: cliente-servidor  
+- Servidor envia N cópias sequencialmente:  
+  - Tempo NF/Us
+- Cliente i leva um tempo F/di para o download.  
+```
+Tempo para distribuir F a N clientes usando
+= dcs = max {NF/Us, F/min(di)}
+```
+
+### Tempo de distribuição de arquivo: P2P
+
+- Servidor deve enviar uma cópia: tempo F/Us.  
+- Cliente i leva tempo F/di para o download.  
+- NF bits devem ser baixados (agregados).
+- Taxa de upload mais rápida possível: Us + ∑Ui.
+
+```
+dp2p = max {F/Us, F/min(di)i, NF/(Us + ∑Ui)}
+```  
+
+### Cliente-servidor VS P2P: exemplo
+- Taxa de upload cliente = U.
+- F/U = 1 hora.
+- Us = 10U.
+- dmin >= Us.
+<div>
+  <img src="./img/A05-img13.png" alt="A05-img13"/>
+</div>
+&nbsp;
+
+### Distribuição de arquivos: BitTorrent  
+- Distribuição de arquivos P2P.  
+- **Rastreador:** verifica pares que participam do torrent.  
+- **torrent:** grupo de pares trocando pedaços de um arquivo.  
+<div>
+  <img src="./img/A05-img14.png" alt="A05-img14"/>
+</div>  
+
+- Arquivo dividido em pedaços de 256 KB.
+- Torrent de ajuntamento de pares:
+  - Não tem pedaços, mas os acumulará
+com o tempo
+  - Registra com rastreador para obter lista de
+pares, conecta a subconjunto de pares (“vizinhos”)
+- Ao fazer download, par faz upload de pedaços para outros pares
+- Pares podem ir e vir
+- Quando par tem arquivo inteiro, ele pode (de forma egoísta) sair
+ou (de forma altruísta) permanecer
+- **Empurrando pedaços**
+  - A qualquer momento, diferentes pares têm diferentes subconjuntos de pedaços de arquivos.  
+  - Periodicamente, um par (Alice) pede a cada vizinho a lista de pedaços que eles têm.  
+  - Alice envia requisições para seus pedaços que faltam.  
+    - Mais raros primeiro.  
+- **Enviando pedaços: Olho por olho**
+  - Alice envia pedaços a quatro vizinhos atualmente, enviando seus pedaços na velocidade mais alta.  
+  - A cada 30s: Seleciona outro par aleatoriamente e começa a enviar pedaços.  
+    - O par recém-escolhido pode se juntar aos 4 maiores.  
+    - "desafoga" de forma otimista.
+
+<div>
+  <img src="./img/A05-img15.png" alt="A05-img15"/>
+</div>  
+&nbsp;
+
+### Distribuited Hash Table (DHT)  
+
+- DHT = banco de dados P2P distribuído.  
+- BDs tem tuplas (chave, valor);  
+  - Chave: número ss; valor; nome humano.  
+  - Valor: tipo conteúdo; valor; endereço IP.  
+- Pares **consultam** BD com chave.
+  - BD retorna valores que combinam com a chave.  
+- Pares também podem inserir duplas (chave, valor).  
+
+### Identificadores DHT  
+
+- Atribuem identificador inteiro a cada par no intervalo [0,2^n - 1].
+  - Cada identificador pode ser representado por n bits.  
+- Exigem que cada chave seja um inteiro no **mesmo intervalo**.  
+- Para obter chaves inteiras, misture chave original.  
+  - Ex.: chave = h("Led Zepplin IV").  
+  - É por isso que a chamamos de tabela "hash" distribuída.
+
+### Como atribuir chaves aos pares?  
+- Questão central:
+  - Atribuir duplas (chave, valor) aos pares.  
+- Regra: atribuir chave ao par que tem o ID mais próximo.  
+- Convenção na aula: mais próximo é sucessor imediato da chave.  
+- Ex.: n = 4; pares: 1, 3, 4, 5, 8, 10, 12, 14.  
+  -  Chave = 13, então par sucessor = 14
+  -  Chave = 15, então par sucessor = 1  
+
+### DHT circular
+
+<div>
+  <img src="./img/A05-img16.png" alt="A05-img16"/>
+</div>  
+
+- Cada par só conhece sucessor e predecessor imediato.  
+- "rede de sobreposição".  
+
+### DHT circilar com atalhos  
+<div>
+  <img src="./img/A05-img17.png" alt="A05-img17"/>
+</div>  
+- Cada par registra endereços IP do predecessor, sucessor, atalhos.  
+- Reduzido de 6 para 2 mensagens.  
+- Possível cirar atalhos de modo que O(log N) vizinhos, O(log N) mensagens na consulta.  
+
+### Peer Churn  
+- É preciso que cada par conheça o endereço IP de seus dois sucessores.  
+- Cada par periodicamente envia 'ping' aos seus dois sucessores para ver se eles ainda estão vivos.  
+- par 5 sai abruptamente.  
+- par 4 detecta
+  - torna 8 seu sucessor imediato  
+  - pergunta a 8 quem é seu sucessor imediato
+  - torna o sucessor imediato de 8 seu segundo sucessor.  
+- E se o par 13 quiser se juntar?  
+
+### Estudo de caso do P2P: Skype  
+
+- Inerentemente P2P: pares de usuário se comunicam.  
+- Protocolo próprio da camada de aplicação (deduzido por engenharia reversa).  
+- Sobreposição hierárquica com SNs.  
+- Índice compara usernames com endereços IP: distribuído por SNs.
+
+<div>
+  <img src="./img/A05-img18.png" alt="A05-img18"/>
+</div>  
+&nbsp;
+
+### Pares como retransmissores  
+- Problema quando Alice e Bob estão atrás de "NATs".
+  - NAT impede que um par de fora inicie uma chamada para um par de dentro da rede.  
+- Solução:
+  - Usando os SNs de Alice e de Bob, o retransmissor é escolhido.  
+  - Cada par inicia a sessão com retransmissão.  
+  - Pares agora podem se comunicar através de NATs com retransmissão.  
+
+### Programação de sockets
+
+- **Objetivo**: Aprender a criar aplicações cliente-servidor que se comunica usando sockets.  
+- **API socket**
+  - Introduzida no BSD4.1 UNIX em 1981.  
+  - Cirada, usada e liberada explicitamente pelas apls.  
+  - Paradigma cliente-sevidor.  
+  - Dois tipos de serviços de transporte por meio da API socket: UDP e TCP.  
+- **Socket**: É uma interface criada pela aplicação e controlada pelo SO (porta) na qual o processo da aplicação pode enviar e receber mensagens para/de outro processo da aplicação.  
+
+#### Fundamentos
+
+- Servidor deve estar rodando antes que o cliente possa lhe enviar algo.  
+- Servidor deve ter um socket (porta) pelo qual recebe e envia segmentos.  
+- O cliente precisa de um socket.
+- Socket é identificado localmente com um **número de porta**.  
+- Cliente precisa saber o endereço IP do servidor e o número de porta do socket.  
+
+### Programação de socket com UDP.  
+
+- UDP: sem "conexão" entre cliente e servidor.  
+- Sem "handshaking".  
+- Emissor conecta de forma explícita endereço IP e porta do destino a cada segmento.  
+- SO conecta endereço IP e porta do socket emissor a cada segmento.  
+- Servidor pode extrair endereço IP, porta do emissor a partir do segmento recebido.  
+- Ponto de vista da aplicação:
+  - UDP oferece transferência não confiável de grupos de bytes (datagramas) entre cliente e servidor.  
+- **Nota**: A terminologia oficial para um pacote UDP é "datagrama". Nesta aula, usamos "Segmentos UDP" em seu lugar.  
+
+#### Exemplo em curso
+
+- Cliente
+  - Usuário digita linha de texto.  
+  - Programa cliente envia linha ao servidor.  
+- Servidor
+  - Servidor recebe linha de texto.  
+  - Coloca todas as letras em maiúsculas.  
+  - Envia linha modificada ao cliente.  
+- Cliente
+  - Recebe linha de texto.
+  - Apresenta.  
+
+### Interação de socket cliente/servidor (UDP)
+
+<div>
+  <img src="./img/A05-img19.png" alt="A05-img19"/>
+</div> 
+&nbsp; 
+
+### Exemplo de cliente em Python (UDP)
+<div>
+  <img src="./img/A05-img20.png" alt="A05-img20"/>
+</div> 
+&nbsp; 
+
+### Exemplo de servidor em Python (UDP)
+<div>
+  <img src="./img/A05-img21.png" alt="A05-img21"/>
+</div> 
+&nbsp; 
+
+- **OBS**: Para mais detalhes dos códigos acima, consulte o livro do Kurose.
 
 
+### Programação de socket usando TCP
+
+- **Serviço TCP**: Transferência confiável de **bytes** de um processo para outro.
+
+- Cliente deve contacter servidor.  
+  - Processo servidor primeiro deve estar rodando.  
+  - Servidor deve ter criado socket (porta) que aceite contato do cliente.  
+- Cliente contacta servidor
+  - Criando socket TCP local ao cliente.  
+  - Especificando endereço IP, # porta do processo servidor.  
+  - Quando o cliente cria socket, o cliente TCP estabelece conexão com servidor TCP.  
+  - Quando contactado pelo cliente, o servidor TCP cria **um novo socket para o servidor se comunicar com o cliente**.  
+    - Permite que o servidor fale com múltiplos clientes.  
+    - Números de porta de origem usados para distinguir clientes.  
+- Ponto de vista da aplicação: TCP oferece transferência de bytes confiável, em ordem ("pipe") entre clientes e servidore.  
+
+### Interação de socket cliente/servidor (TCP)
+<div>
+  <img src="./img/A05-img22.png" alt="A05-img22"/>
+</div> 
+<div>
+  <img src="./img/A05-img23.png" alt="A05-img23"/>
+</div> 
+&nbsp; 
+
+### Jargão de cadeia
+
+- Uma cadeia é uma sequência
+de caracteres que flui para
+dentro ou fora de um
+processo.
+- Uma cadeia de entrada está
+conectada a uma fonte de
+entrada para o processo. Ex.: teclado ou socket.
+- Uma cadeia de saída está
+conectada a uma fonte de
+saída. Ex.: monitor ou
+socket.  
+
+### Programação de socket com TCP - Exemplo
+
+1. Cliente lê linha da entrada padrão
+(cadeia inFromUser), envia ao
+servidor via socket (cadeia
+outToServer).
+1. Servidor lê linha do socket.
+1. Servidor converte linha para
+maiúsculas, envia de volta ao cliente.
+1. Cliente lê, imprime linha modificada
+do socket (cadeia inFromServer).
+
+### Exemplo de cliente em Python (TCP)
+
+<div>
+  <img src="./img/A05-img24.png" alt="A05-img24"/>
+</div> 
+&nbsp; 
+
+### Exemplo de servidor em Python (TCP)
+
+<div>
+  <img src="./img/A05-img25.png" alt="A05-img25"/>
+</div> 
+&nbsp; 
+
+- **OBS**: Para mais detalhes dos códigos acima, consulte o livro do Kurose.
 
 ---
