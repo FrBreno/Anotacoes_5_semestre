@@ -56,6 +56,12 @@ Programa fonte -> Compilador -> Programa alvo
 - Dado um alfabeto Σ:
   - Σ^* é o conjunto de todas as cadeias finitas sobre Σ.
   - Σ^+ é o conjunto de todas as cadeias finitas sobre Σ menos a cadeia vazia.
+    - Exemplo: Σ = {0, 1} - Temos:
+      - Σ^+ = Σ^1 U Σ^2 U Σ^3 U ...
+      - Σ^* = Σ^+ U { ε }
+      - Σ^1 = {0, 1}
+      - Σ^2 = {00, 01, 10, 11}
+      - Σ^3 = {000, 001, 010, 011, 100, 101, 110, 111}
 - Linguagem
     - Subconjunto de Σ^*
 - Linguagem sobre Σ
@@ -341,5 +347,261 @@ FLOAT ID(match0) LPAREN CHAR STAR ID(s) RPAREN LBRACE IF LPAREN BANG ID(strncmp)
 - Como encontrar estados equivalentes?  
   - `trans[s1,c] = trans[s2,c]` para todo `c`. -> Isso não é suficiente!
   - _S1_ e _S2_ são equivalentes quando o autômato aceita σ começando em _S1_ sse ele também aceita σ começando em _S2_.
+
+---
+
+## Aula 06 - Análise Sintática -  05.04.2023
+
+### Analisador Sintático (Parser)
+
+- Recebe uma sequência de tokens do analisador léxico e determina se a string pode ser gerada através da gramática da linguagem fonte.  
+- É esperado que ele reporte os erros de uma maneira inteligível.  
+- Deve se recuperar de erros comuns, continuando a processar a entrada.
+
+&nbsp;
+### Gramáticas livre de contexto
+
+- ERs são boas para definir a estrutura léxica de maneira declarativa.  
+- Entretanto, não são "poderosas" o suficiente para definir declarativamente a estrutura sintática de linguagens de programação.
+- Exemplo de ER usando abreviações:  
+  - digits = [0-9]^+
+  - sum = (digits "+")^* digits
+  - definem somas da forma 28+301+9  
+- Como isso é implementado?  
+  - O analisador léxico substitui as abreviações antes de traduzir para um autômato finito.  
+  - sum = ([0-9]^+ "+")^*[0-9]^+
+- É possível usar a mesma ideia para definr uma linguagem para expressões que tenham parênteses balanceados?  
+  - (1+(245+2))
+- Tentativa
+  - digits = [0-9]^+
+  - sum = expr "+" expr
+  - expr = "(" sum ")" | digits
+- O analisador léxico substituiria _sum_ em _expr_:
+  - expr = "(" expr "+" expr ")" | digits
+- Depois substituiria _expr_ no próprio _expr_:  
+  - expr = "(""(""(" expr "+" expr ")" | digits")" "+" expr")" | digits
+- Note que assim, ainda teríamos _expr's_ do lado direito.
+- As abreviações não acrescentam o poder de expressar recursão às ERs.
+- E é isso que precisamos para expressar a recursão mútua entre _sum_ e _expr_.  
+- E também para expressar a sintaxe de linguagens de programação.  
+```
+expr = ab(c|d)e => aux = c|d
+                   expr = a b aux e
+```  
+
+- Descreva uma linguagem através de um conjunto de produções da forma:  
+```
+symbol -> symbol symbol symbol symbol ... symbol
+```
+- onde existem zero ou mais símbolos do lado direito.  
+- Símbolos:
+  - Terminais: uma string do alfabeto da linguagem.
+  - Não-terminais: aparecem do lado esquerdo de alguma produção.  
+  - Nenhum token aparece do lado esquerdo de uma produção.  
+  - Existe um não-terminal definido como _start symbol_.
+
+- Considere:
+1. A -> 0A1
+2. A -> B
+3. B -> #
+
+- Gerar cadeias da linguagem
+1. Escrever variável inicial.
+1. Encontre uma variável escrita e uma regra para essa variável. Substitua essa variável pelo lado direito da regra.  
+1. Repita o passo 2 até não restar variáveis
+
+- A sequência de substituição é chamada de derivação.  
+- Ex.:
+  - 000#111
+  - A -> 0A1
+
+- Linguagem: O conjunto de todas as cadeias que podem ser geradas dessa maneira.
+
+&nbsp;
+### Hierarquia de Chomsky
+
+<div>
+  <img src="./imgs/A06/A06-img01.png" alt="A06-img01" />
+</div>
+<div>
+  <img src="./imgs/A06/A06-img02.png" alt="A06-img02" />
+</div>
+&nbsp;
+
+### Gramáticas livre de contexto
+
+- Considere a seguinte grmática:  
+
+```
+1. S -> S;S             6. E -> E + E
+2. S -> id := E         7. E -> (S,E)
+3. S -> print(L)        8. L -> E
+4. E -> id              9. L -> L, E
+5. E -> numm
+```
+`id := num;   id := id + (id := num + num, id)`
+
+<div>
+  <img src="./imgs/A06/A06-img03.png" alt="A06-img03" />
+</div>
+&nbsp;
+
+### Derivações
+- _left-most_: o não terminal mais a esquerda é sempre o expandido;
+- _right-most_: o não terminal mais a direita é sempre o mais expandido.
+
+### Parse Trees
+- Constrói-se uma arvore conectado-se cada símbolo em uma derivação ao qual ele foi derivado.  
+- Duas derivações diferentes podem levar a uma mesma _parse tree_.
+<div>
+  <img src="./imgs/A06/A06-img04.png" alt="A06-img04" />
+</div>  
+&nbsp;
+
+### Gramáticas Ambíguas
+- Podem derivar uma sentença com duas _parse trees_ diferentes.  
+  - `id := id + id  id`
+<div>
+  <img src="./imgs/A06/A06-img05.png" alt="A06-img05" />
+</div>
+&nbsp;  
+
+#### É Ambígua?
+
+```
+1. E −→ id      5.E −→ E + E
+2. E −→ num     6.E −→ E - E
+3. E −→ E * E    7.E −→ (E)
+4. E −→ E/E
+```
+- Construa _parse Trees_ para as seguintes expressões:
+  - 1-2-3
+  - 1+2*3
+<div>
+  <img src="./imgs/A06/A06-img06.png" alt="A06-img06" />
+</div>
+<div>
+  <img src="./imgs/A06/A06-img07.png" alt="A06-img07" />
+</div>
+&nbsp;  
+
+- Os compiladores usam as _parse trees_ para extrair o significado das expressões.  
+- A ambiguidade se torna um problema.  
+- Podemos, grealmente, mudar a gramática de maneira a retirar a ambuiguidade.
+- Alterando o exemplo anterior:  
+  - Queremos colocar uma precedência maior para * em relação ao + e ao -.  
+  - Também queremos que cada operador seja associado à esquerda:  
+    - (1-2)-3 e não 1-(2-3)
+- Conseguimos introduzir novos não-terminais.  
+```
+1. E −→ E + T     4.T −→ T * F      7.F −→ id
+2. E −→ E - T     5.T −→ T/F        8.F −→ num
+3. E −→ T         6.T −→ F          9.F −→ (E)
+```  
+- Geralmente podemos transformar uma gramática para retirar a ambiguidade.  
+- Algumas linguagens não possuem gramáticas não ambíguas.  
+- Mas elas não seriam apropriadas como linguagens de programação.  
+
+### Fim de Arquivo
+```
+0. S −→ E $
+1. E −→ E + T     4.T −→ T * F      7.F −→ id
+2. E −→ E - T     5.T −→ T/F        8.F −→ num
+3. E −→ T         6.T −→ F          9.F −→ (E)
+```  
+- Criar um novo não terminal como símbolo inicial.  
+&nbsp;  
+
+### Parsing
+- CFG (_context free grammar_) geram as linguagens.  
+- Parsers são reconhecedores das linguagens.  
+- Para qualquer CFG é possível obter um parser que roda em O(n^3).
+  - Algoritmos de Early e CYK (Cocke-Younger-Kasami).  
+- O(n^3) é muito lento para programas grandes.  
+- Existem classes de gramáticas para as quais podemos construir parsers que rodam em tempo linear.  
+  - LL: left-to-right, left-most derivation.  
+  - LR: left-to-right, right-most derivation.  
+&nbsp;
+
+### Análise Descendente (Predictive Parsing)  
+- Também chamados de _recursive-descent_ ou _top-down_.  
+- É um algoritmo simples, capaz de fazer o _parsing_ de algumas gramáticas (gramáticas LL).  
+- Cada produção se torna uma clásula em uma função recursiva.  
+- Temos uma função para cada não-terminal.  
+```
+E −→ +EE
+E −→ *EE
+E −→ a|b
+```  
+- Expressões pré-fixas.  
+- Considere a cadeia +b*ab.  
+- Como é sua derivação mais à esquerda?  
+- Análise descedente produz uma derivação à esquerda.  
+- Precisa determinar a produção a ser usada para expandir o não-terminal corrente.  
+- Vejamos um exemplo de implementação.   
+```
+S −→ if E then S else S
+S −→ begin S L
+S −→ print E
+L −→ end
+L −→ ; S L
+E −→ num = num
+```
+<div>
+  <img src="./imgs/A06/A06-img08.png" alt="A06-img08" />
+</div>  
+&nbsp;
+
+```
+0. S −→ E $
+1. E −→ E + T     4.T −→ T * F      7.F −→ id
+2. E −→ E - T     5.T −→ T/F        8.F −→ num
+3. E −→ T         6.T −→ F          9.F −→ (E)
+```   
+- Vamos aplicar a mesma técnica para essa outra gramática...  
+- Como decidir entre E+T e T na função que implementa o não-terminal E?
+  - Tanto E como T podem derivar cadeias começando com id ou "(".  
+  - E se você puder olhar o número k > 1 para fente da entrada?  
+- Essas cadeias podem ter tamanho arbitrário.  
+- O problema permanece.
+<div>
+  <img src="./imgs/A06/A06-img09.png" alt="A06-img09" />
+</div>  
+&nbsp;  
+
+### Conjuntos FIRST e FOLLOW  
+- Dada uma string y de terminais e não terminais.  
+  - FIRST(y) é o conjunto de todos os terminais que podem iniciar uma string de terminais derivadas de y.  
+  - FOLLOW(X) é o conjutno de terminais que podem imediatamente seguir X.  
+  - t ∈ FOLLOW(X) se existe alguma derivação contendo Xt.  
+  - Cuidado com derivações da forma XYZt, onde Y e Z podem ser vazios.
+- Exemplo usando a gramática anterior:  
+  - y = T*F  
+    - FIRST(y) = {id, num, (}   
+&nbsp;   
+
+### Algoritmo para calcular os conjuntos FIRST e FOLLOW  
+<div>
+  <img src="./imgs/A06/A06-img10.png" alt="A06-img10" />
+</div>  
+&nbsp;  
+
+### Análise Descendente (Predictive Parsing)
+
+- Se uma gramática tem produções da forma:  
+  - X -> y1
+  - X -> y2
+    - Caso os conjuntos FIRST(y1) e FIRST(y2) tenham intersecção, então a gramática não pode ser analisada com um predictive parser.  
+- Por quê?  
+  - A função recursiva não vai saber que caso executar;
+
+### Resumindo
+- Nullable(X) é verdadeiro se X pode derivar a string vazia.
+- FIRST(y) é o conjunto de terminais que podem iniciar strings derivadas de y.
+-  FOLLOW(X) é o conjunto de terminais que podem imediatamente
+seguir X.
+- t ∈ FOLLOW(X) se existe alguma derivação contendo Xt.
+- Cuidado com derivações da forma XYZt, onde Y e Z podem ser vazios
+
 
 ---

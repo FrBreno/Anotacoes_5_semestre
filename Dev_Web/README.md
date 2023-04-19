@@ -254,3 +254,49 @@ sessionStorage.setItem(aluno.matricula, JSON.stringify(aluno))
 
 #### Retorno
 - `useEffect` retorna `undefined`.
+
+## Aula 06 - 17.04.2023
+
+### O que é o Axios?  
+
+- É um cliente HTTP baseado em promessas para o `node.js` e para o navegador.  
+- É isomórfico (pode rodar no navegador e no node.js com a mesma base de código).
+  - No lado do servidor usa código nativo node.js (módulo http).
+  - No lado do cliente (navegador) usa XMLHttpRequest.
+
+### Features
+
+- Faz XMLHttpRequests do navegador
+- Faz requisições http do node.js
+- Suporta a API de Promessas
+- Intercepta requisições e respostas
+- Transforma os dados de requisições e de respostas
+- Cancela requisições
+- Automaticamente transforma dados para JSON
+- Suporta proteções contra XSRF no lado do cliente  
+
+### O que é o Redux
+
+- É uma biblioteca feita para gerenciar estados em uma aplicação.  
+- Tira a responsabilidade de um componente ter um estado que poderá ser usado por vários outros componentes dentro de sua aplicação.  
+  - Passa isso para um objeto global, que pode ser acessado por qualquer componente, a qualquer momento.
+
+<div>
+    <img src="./imgs/A06-img01.png" alt="A06-img01"/>
+</div>
+
+### Ferramentas do Redux
+
+1. Store
+   - Objeto onde será guardado todos os estados que serão utilizados globalmente na aplicação.
+1. Actions
+   - São ações que serão enviadas do seu componente para acionar os Reducers.
+1. MiddleWares
+   - Fazem toda a lógica necessária com o dado que será aterado no estado que, ccomo vimos mais acima, fica dentro do store.  
+   - Em outras palavras, podemos dizer que MiddleWares são setters, que vão fazer todo o tratamento do dado, aplicar a regra do negócio, etc.  
+1. Reducers
+   - Depois que o MiddleWare tratar os dados, ele despacha esse dado para o reducer informar ao Store que o state foi alterado e assim, todos os outros componentes que precisarem usar esse novo estado são notificados.
+
+- Acesse [Kenzie](https://kenzie.com.br/blog/o-que-e-redux/) para mais informações.  
+
+--- 
