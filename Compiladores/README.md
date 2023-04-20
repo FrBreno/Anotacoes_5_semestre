@@ -487,7 +487,7 @@ symbol -> symbol symbol symbol symbol ... symbol
 
 - Os compiladores usam as _parse trees_ para extrair o significado das expressões.  
 - A ambiguidade se torna um problema.  
-- Podemos, grealmente, mudar a gramática de maneira a retirar a ambuiguidade.
+- Podemos, geralmente, mudar a gramática de maneira a retirar a ambuiguidade.
 - Alterando o exemplo anterior:  
   - Queremos colocar uma precedência maior para * em relação ao + e ao -.  
   - Também queremos que cada operador seja associado à esquerda:  
@@ -603,5 +603,240 @@ seguir X.
 - t ∈ FOLLOW(X) se existe alguma derivação contendo Xt.
 - Cuidado com derivações da forma XYZt, onde Y e Z podem ser vazios
 
+---  
 
----
+## Aula 07 - Análise Sintática -  19.04.2023
+
+### Construindo um Predictive Parser  
+
+- Cada função relativa a um não-terminal precisa conter uma cláusula para cada produção.  
+- Precisa saber escolher, baseado no próximo token, qual a produção apropriada.  
+- Isto é feito através da tabela do predictive parsing.  
+- Dada uma produção X -> γ.  
+- Para cada T ∈ FIRST(γ).  
+  - Coloque a produção X -> γ na linha X, coluna T.  
+- Se γ é nullable.
+  - Coloque a produção na linha X, coluna T para cada T ∈ FOLLOW[X].  
+
+#### Exemplo
+
+<div>
+  <img src="./imgs/A07/A07-img01.png" alt="A07-img01" />
+</div>  
+&nbsp;    
+
+- Não é possível fazer um parser predictive para essa gramática porque ela é ambígua.  
+  - Note que algumas células da tabela do predictive parser têm mais de uma entrada!  
+  - Isso sempre acontece com gramáticas ambíguas (Mas pode acontece também em gramáticas não ambíguas).  
+<div>
+  <img src="./imgs/A07/A07-img02.png" alt="A07-img02" />
+</div>  
+&nbsp;  
+
+- Linguagens cujas tabelas não possuam entradas duplicadas são denominadas de LL(1).  
+  - _left to right parsing, leftmost derivation, 1-symbol lookahead_.  
+- A defnição de conjuntos FIRST pode ser generalizada para os primeiros K tokens de uma string.  
+  - Gera uma tabela onde as linhas são os não-terminais e as colunas são todas as sequências possíveis de k terminais.  
+- Isso raramente é feito devido ao tamanho explosivo das tabelas geradas (deve ter um símbolo para cada combinação, não-terminal-lookahead).  
+- Gramáticas analisáveis com tabelas LL(K) são chamadas LL(K).  
+- Nenhuma gramática ambígua é LL(K) para nenhum k!  
+
+### Recursão à Esquerda  
+```
+0. S −→ E $
+1. E −→ E + T    4.T −→ T * F     7.F −→ id
+2. E −→ E - T    5.T −→ T/F       8.F −→ num
+3. E −→ T        6.T −→ F         9.F −→ (E)
+```  
+- Consigo gerar um parser LL(1) para essa gramática?  
+- Problema:  
+  - A função que implementa E precisa chamar a si mesma caso escolha E+T.  
+  - Porém, é a primeira ação dela, antes de avançar na cadeia de entrada.  
+  - Laço infinito!  
+  - Acontece devido à recursão à esquerda.  
+- Como Resolver? (Fatoração - recursão à direita).  
+```
+E −→ E+T      E −→ TE’
+E −→ E-T      E’ −→ +TE’
+T −→ T*F      E’ −→
+```  
+- Generalizando:  
+  - Tendo X -> Xγ e X -> α, onde α não começa com X.  
+- Derivamos strings da forma αγ^*  
+  - α seguindo de zero ou mais γ.  
+- Podemos reescrever:   
+<div>
+  <img src="./imgs/A07/A07-img03.png" alt="A07-img03" />
+</div>  
+&nbsp; 
+
+### Eliminando Recursão à Esquerda  
+
+```
+0. S −→ E $       5.T −→ FT’        9. F −→ id
+1. E −→ TE’       6.T’ −→ *FT’      10.F −→ num
+2. E −→ +TE’      7.T’ −→ /FT’      11.F −→ (E)
+3. E’ −→ -TE’     8.T’ −→
+4. E’ −→
+```  
+<div>
+  <img src="./imgs/A07/A07-img04.png" alt="A07-img04" />
+</div>  
+<div>
+  <img src="./imgs/A07/A07-img05.png" alt="A07-img05" />
+</div>  
+&nbsp; 
+
+### Fatoração à esquerda
+- Um outro problema para predictive parsing ocorre em sutuação do tipo:  
+```
+S -> if E then S else S
+S -> if E then S
+```  
+- Regras do mesmo não terminal começam com os mesmos símbolos.  
+- Criar um novo não-terminal para os finais permitidos:
+```
+S -> if E then S X
+X -> 
+X -> else S
+```
+
+### Recuperação de erros
+
+- Uma entrada em branco na tabela indica um caractere não esperado.  
+- Parar o processo no primeiro erro encontrado não é desejável.  
+- Duas alternativas:  
+  - Inserir símbolo:
+    - Assume que encontrou o que esperava.  
+  - Deletar símbolo(s):
+    - Pula tokens até que um elemento do FOLLOW seja atingido.  
+
+```
+void T() {switch (tok) {
+  case ID:
+  case NUM:
+  case LPAREN: F(); Tprime(); break;
+  default: print("expected id, num, or left-paren");
+}}
+```
+```
+int Tprime_follow [] = {PLUS, RPAREN, EOF};  
+
+void Tprime() {switch (tok) {
+  case PLUS: break;
+  case TIMES: eat(TIMES); F(); Tprime(); break;  
+  case RPAREN: break;
+  case EOF: break;
+  default: print("expected +, *, right-paren, or end-of-file");
+  skipto(Tprime_follow);
+}}
+```   
+
+### LR Parsing
+- O ponto fraco da técnica LL(k) é precisar prever que produção usar.  
+  - Com base nos primeiros k tokens do lado direito da produção.  
+- LR(k) posterga a decisão até ter visto todo o lado direito de uma produção, mais os k próximos tokens da entrada.  
+  - _Left-to-right parse, rightmost-derivation, k-token lookhead_  
+- O parser tem uma pilha e a entrada.  
+- Os primeiros k tokens da entrada forma o lookahead.  
+- Dois tipos de ações:  
+  - SHIFT: move o primeiro token para o topo da pilha.  
+  - REDUCE:
+    - escolhe uma produção X -> A B C;
+    - desempilha C, B e A.
+    - empilha X.
+<div>
+  <img src="./imgs/A07/A07-img06.png" alt="A07-img06" />
+</div>  
+&nbsp; 
+
+#### Exemplo
+<div>
+  <img src="./imgs/A07/A07-img07.png" alt="A07-img07" />
+</div>  
+&nbsp; 
+
+### LR Parsing Engine
+- Como o parser sabe quando fazer um SHIFT ou um REDUCE?  
+- Usando um DFA aplicado a pilha!  
+- As arestas são nomeadas com os símbolos que podem aparecer na pilha.  
+
+#### Exemplo
+<div>
+  <img src="./imgs/A07/A07-img08.png" alt="A07-img08" />
+</div>  
+&nbsp; 
+
+### Tabela de transição
+- 4 tipos de ações:  
+  - sn: SHIT para o estado n;  
+  - gn: vá para o estado n;
+  - rk: REDUCE pela regra k;  
+  - a: Accept;  
+  - : Error (entrada em branco).
+- As arestas do DFA são as ações SHIFT e goto.  
+- No exemplo anterior, cada número indica o estado destino.  
+
+### Algoritmo  
+- Olhe para o estado no topo da pilha e para o símbolo de entrada para determinar a ação.  
+- Se a ação for SHIFT(n):
+  - A entrada avança um símbolo e é feito um _push_ de n na pilha.  
+- Se a ação for REDUCE(k):
+  - Desempilhe r símbolos da pilha (pop), onde r é o número de símbolos no lado direito da regra k.  
+  - Seja X o símbolo do lado esquerdo da regra k;  
+    - No estado (atual) do topo da pilha, procure X para obter um "goto n".  
+    - Adicione X ao topo da pilha.  
+- Accept: para o parsing e reporta sucesso.  
+- Error: para o parsing e reporta falha.
+
+### Tabela de transição  
+
+- O exemplo anterior mostrou o uso de 1 símbolo de lookhead.  
+- Para k, a tabela terá colunas para todas as sequências de k tokens.  
+- k > 1 praticamente não é usado para compilação.  
+- Maioria das linguagens de programação podem ser descritas por gramáticas LR(1).  
+
+### Geração de Parsers LR(0)  
+
+- LR(0) são as gramáticas que podem ser analisadas olhando somente a pilha.  
+
+```
+0. S' -> S$;      3. L -> S
+1. S -> (L)       4. L -> L,S
+2. S -> x
+```  
+
+### Estados  
+
+<div>
+  <img src="./imgs/A07/A07-img09.png" alt="A07-img09" />
+</div>  
+&nbsp;  
+
+- Ação de Goto:
+  - Imagine um SHIFT de "x" ou "(" no estado 1 seguido de redução pela produção de S correspondente.  
+  - Todos os símbolos do lado direito da produção serão desempilhados e o parser vai executar um goto para S no estado 1.  
+  - Isso se representa movendo-se o ponto para após o S e colocando este item em um novo estado (4):  
+  ```
+  S' -> S.$
+  ```  
+
+#### Exemplo:
+<div>
+  <img src="./imgs/A07/A07-img10.png" alt="A07-img10" />
+</div>  
+<div>
+  <img src="./imgs/A07/A07-img11.png" alt="A07-img11" />
+</div>  
+&nbsp;  
+
+### Algoritmos
+<div>
+  <img src="./imgs/A07/A07-img12.png" alt="A07-img12" />
+</div>  
+<div>
+  <img src="./imgs/A07/A07-img13.png" alt="A07-img13" />
+</div>  
+&nbsp;  
+
+--- 
