@@ -943,4 +943,125 @@ S -> if E then S .else S      (any)
 
 ## Aula 09 - Análise Semântica - 26.04.2023
 
+### Introdução
+- O parser define uma estrutura sintática ilustrada por uma àrvore sintática, entretanto não há definição de significado.  
+  - Qual o tipo da variável "x"?
+  - A variável "x" foi redeclarada?
+  - Existem identificadores que não foram declarados?  
+  - Declarados, mas não usados?
+  - A expressão "x*y+d" é consistente no tipo?
+  - Quantos argumentos tem a função gamb()?
+  - Os tipos dos argumentos da função gamb() são consistentes?  
+
+### Tipos de dados
+- Dois propósitos principais:  
+  - Fornecer um contexto implícito:  
+    - Pascal
+      - a+b: real ou integer?
+      - New p: alocação no heap de tamanho correto.
+    - C++/Java
+      - New m.type(): chamada automática de construtor.  
+  - Limitar o conjunto de operações semanticamente válidas.  
+    - Registros não podem ser somados a caracteres, etc.
+    - Tipos de parâmetros de funções.  
+    - Não conseguem prevenir qualquer tipo de erro. 
+    - Pegam um número de erros suficientes para ser de grande valor prático.  
+
+### Sistema de tipos
+- Podemos dizer que consiste de:  
+  - Um mecanismo para definição de tipos e sua associação a certas construções da linguagem.  
+  - Um conjunto de regras para:  
+    - Equivalência.  
+    - Compatibilidade.  
+    - Inferência.  
+  - Equivalência
+    - Determinar quando os tipos de dois valores são os mesmos.  
+  - Compatibilidade  
+    - Determinar quando um valor de um dado tipo pode ser usado em um certo contexto.  
+  - Inferência  
+    - Determinar o tipo de uma expressão a partir dos tipos de seus componentes ou (as vezes) do contexto em volta.  
+  - Verificação de tipos
+    - Assegura que o programa obedece as regras de compatibilidade da linguagem.  
+  - Linguagem fortemente tipada (_strongly typed_)  
+    - São linguagem onde os objetos/variáveis tem um tipo bem definido e que precisa ser informado no momento de sua declaração. Nela todas as variáveis têm um tipo específico e seus tipos são importantes para a linguagem.  
+  - Linguagem estaticamente tipada (_statically typed_)  
+    - É fortemente tipada.  
+    - Verificação de tipos feita em tempo de compilação.  
+      - Poucas linguagens satisfazem, se encarado estritamente.  
+      - Na prática, o termo é aplicado quando a maior parte da verificação é feita esticamente.  
+   - Ada:
+     - Fortemente tipada e em sua maioria estaticamente tipada.  
+   - Pascal:
+     - Maior parte estaticamente tipada.  
+     - Não é fortemente tipada: _untagged variant records_.  
+   - C:
+     - Não é fortemente tipada.  
+       - Unions.  
+       - Subrotinas com número variável de parâmetros.  
+       - Interoperabilidade entre arrays e ponteiros.  
+     - Implementação de C não costumam checar qualquer coisa em tempo de execução.
+  - Assembly:  
+    - Não tem sistema de tipos.  
+    - Operações de qualquer tipo podem ser aplicadas a valores em locais arbitrários (memória ou registradores).  
+  - Verificação Dinâmica  
+    - Operações verificam em tempo de execução se os tipos de sues operadores são aceitáveis.  
+    - Ex.: LIST, Smalltalk, Schem.  
+    - Maior parte das verificações feita em tempo de execução.  
+    - Operações verificam em tempo de execução se os tipos de seus operandos são aceitáveis.  
+      - LISP, Smalltalk, Schem, Python, Perl...  
+    - Podem ser mais flexíveis e sotisficados por terem informação de tempo de execução.  
+    - Só asseguram que uma dada execução do programa está correta.  
+    - É repetida para todas as execuções.  
+
+### Analisador Semântico  
+- Checa os tipos de cada expressão.  
+- Relaciona declarações de variáveis com seus usos.  
+- É caracterizado pela manipulação de tabelas de símbolos.  
+  - Mapeiam identificadores e seus tipos e localização.  
+- Declarações geram inclusões nas tabelas de símbolos.  
+- Uso geram consultas nas tabelas.  
+- Escopo
+  - Determina a visibilidade.  
+  - Ex.: variáveis locais de um método são visíveis apenas dentro do método.  
+- Tabelas são também chamadas de ambientes.   
+- Ambientes são conjuntos de "amarrações" do tipo:  
+  - {g -> string, a -> int}  
+
+<div>
+  <img src="./imgs/A09/A09-img01.png" alt="A09-img01" />
+</div>  
+&nbsp;  
+
+### Como implementar a tabela de símbolos?  
+
+- Existem duas escolhas para se implementar a tabela de símbolos:  
+  - Usando um estilo funcional: mantemos o estado σ1 enquanto criamos os estados o σ2 e o σ3.  
+    - Assim, quando precisamos de o σ1 novamente ele estará pronto para ser usado.  
+  - Usando o estilo imperativo: no estilo imperativo, modificamos σ1 até ele se tornar σ2.  
+  - Essa atualização destrutiva "destrói" σ1; enquanto σ2 existe, não podemos consultar a tabela σ1.  
+  - Mas quando terminamos com σ2, podemos "desfazer" até termos novamente σ1.  
+
+### Implementação eficiente da tabela de símbolo (Imperativa)  
+- Como um programa grande pode conter milhares de identificadores distintos, a tabela de símbolos deve permitir uma busca eficiente.  
+- A implementação do ambiente usando o estilo imperativo, normalmente, usa tabelas _hash_, que são muito eficientes.  
+- A operação σ' = σ + {σ -> τ} é implementada inserindo τ na tabela _hash_ com a chave σ.  
+- Uma simples tabela _hash_ com encadeamento externo funciona bem e permite fácil remoção.  
+- Vamos precisar deletar {σ -> τ} para recuperar σ no fim do escopo de σ.  
+
+### Implementação eficiente da tabela de símbolos (Funcional)
+
+- No estilo funcional, queremos computar σ' = σ + {σ -> τ} de modo que continuamos com σ disponível.  
+- Desse modo, em vez de "alterar" a tabela adicionando uma amarração, criamos uma nova tabela computando a "soma" de uma tabela existente e uma nova amarração.  
+- Por exemplo, quando fazemos a adição 7 + 8 não alteramos o valor de 7 pela adição de 8; nós criamos um novo valor, 15 e o 7 continua disponível para outras computações.  
+- Entretanto, atualizações não destrutivas não são eficientes para tabelas _hash_.  
+- Uma forma de implementar tal estilo eficientemente é usando árvores de busca binária.  
+- Considere, por exemplo, uma árvore de busca que representa o mapeamento.  
+`m1 = {bat -> 1m camel -> 2, dog -> 3}`  
+- Podemos adicionar a amarração `mouse -> 4`, criando o mapeamento `m2` sem destruir o mapeamento `m1`.  
+<div>
+  <img src="./imgs/A09/A09-img02.png" alt="A09-img02" />
+</div> 
+
+
+
 ___
