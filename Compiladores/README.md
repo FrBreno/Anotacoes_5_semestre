@@ -430,7 +430,7 @@ symbol -> symbol symbol symbol symbol ... symbol
 
 ### Gramáticas livre de contexto
 
-- Considere a seguinte grmática:  
+- Considere a seguinte gramática:  
 
 ```
 1. S -> S;S             6. E -> E + E
@@ -460,7 +460,7 @@ symbol -> symbol symbol symbol symbol ... symbol
 
 ### Gramáticas Ambíguas
 - Podem derivar uma sentença com duas _parse trees_ diferentes.  
-  - `id := id + id  id`
+  - `id := id + id + id`
 <div>
   <img src="./imgs/A06/A06-img05.png" alt="A06-img05" />
 </div>
@@ -839,4 +839,108 @@ void Tprime() {switch (tok) {
 </div>  
 &nbsp;  
 
+## Aula 08 - Análise Sintática -  25.04.2023
+
+### SLR
+
+### SLR Parser  
+```
+0. S -> E$          2. E -> T
+1. E -> T + E       3. T -> x
+```
+<div>
+  <img src="./imgs/A08/A08-img01.png" alt="A08-img01" />
+</div>  
+&nbsp;
+
+- Colocar reduções somente onde indicado pelo conjunto FOLLOW.  
+- Ex.: FOLLOW(E) = {$}
+<div>
+  <img src="./imgs/A08/A08-img02.png" alt="A08-img02" />
+</div>  
+&nbsp;  
+
+### LR(1)
+- Mais poderoso do que SLR.  
+- Maioria das linguagens de programação são LR(1).  
+  - Exceção notável: C++
+- Algoritmo similiar ao LR(0)
+- Item: (A -> α.β, x)  
+
+### Exemplo
+```
+0. S -> S$;       3. E -> V
+1. S -> V = E     4. V -> x
+2. S -> E         5. V -> *E
+```
+<div>
+  <img src="./imgs/A08/A08-img03.png" alt="A08-img03" />
+</div>  
+<div>
+  <img src="./imgs/A08/A08-img04.png" alt="A08-img04" />
+</div>  
+<div>
+  <img src="./imgs/A08/A08-img05.png" alt="A08-img05" />
+</div>  
+&nbsp;  
+
+### LALR(1)
+- O tamanho das tabelas LR(1) pode ser muito grande.  
+- É possível reduzir o tamanho unindo estados do DFA.  
+  - Junte os estados que possuam os itens idênticos, ecxeto pelo lookahead.
+- Vejamos o exemplo anterior.
+<div>
+  <img src="./imgs/A08/A08-img06.png" alt="A08-img06" />
+</div>  
+&nbsp;  
+
+- Pode gerar uma tabela com conflitos, onde LR(1) não possuía.  
+  - Na prática, o efeito de redução no uso de memória é bastante desejável.  
+- A maioria das linguagens de programação é LALR(1).  
+- É o tipo mais usado em geradores automáticos de parses.  
+
+### Hierarquia das gramáticas
+<div>
+  <img src="./imgs/A08/A08-img07.png" alt="A08-img07" />
+</div>  
+&nbsp;  
+
+### Ambiguidade  
+```
+S -> if E then S else S
+S -> if E then S
+S -> other
+```  
+- Como seria a parser tree para:
+```
+if a then if b then s1 else s2
+```
+1. `if a then {if b then s1 else s2}`
+1. `if a then {if b then s1} else s2`
+- Teríamos um conflito SHIFT-REDUCE:
+```
+S -> if E then S.             else
+S -> if E then S .else S      (any)
+```
+
+### Eliminando  
+- Pode-se usar a gramática ambígua, decidindo os conflitos sempre por SHIFT em casos desse tipo.  
+- Somente aconselhável em casos bem conhecidos.  
+
+### Diretivas de precedência  
+- Nenhuma gramática ambígua é LR(k), para nenhum k.  
+- Podemos usá-las se encontramos uma maneira de resolver os conflitos.  
+- Relembrando um exemplo anterior... (Ver slide)
+- Podem ajudar.  
+- Não devem ser abusivamente utilizadas.  
+- Se não conseue explicar ou bolar um uso de precedência que resolva o seu problema, reescreva a gramática.
+<div>
+  <img src="./imgs/A08/A08-img08.png" alt="A08-img08" />
+</div>  
+&nbsp;  
+
 --- 
+
+## Aula 09 - Análise Semântica - 26.04.2023
+
+___
