@@ -158,6 +158,8 @@ Novos dados -> Modelo preditivo -> Predição
 ---
 ## Aula 03 - 27.03.2023
 
+![Acurácia - meme](https://www.flai.com.br/wp-content/uploads/2020/07/postnovos_ju-300x300.jpg)
+
 ### Leitura complementar desta aula
 - [K-Nearest Neighbors (KNN) Classification with scikit-learn](https://www.datacamp.com/tutorial/k-nearest-neighbor-classification-scikit-learn)
 - veja: `A Beginner's Guide to The Machine Learning Workflow` (na pasta de pdf's).
@@ -327,7 +329,6 @@ Novos dados -> Modelo preditivo -> Predição
     <img src="./imgs/Aula03-img11.png" alt="Aula03-img11"/>
 </div>  
 &nbsp;
-
 
 ## Aula 04 - 04.04.2023
 
@@ -521,8 +522,110 @@ Novos dados -> Modelo preditivo -> Predição
 
 - Máximo (1 - 1/ nc) quando os registros são distribuídos igualmente entre todas as classes, implicando nas informações menos interessantes.  
 - Mínimo (0) quando todos os registros pertencem a uma classe, implicando nas informações mais interessantes.
-    
-
-
 
 ---
+
+## Aula 05 - Regressão Linear - 17.04.2023
+
+- Há datasets disponíveis no scikit learning para práticas (consultar documentação).
+
+### Regressão
+
+- Entrada: Variáveis descritoras e valor alvo contínuo.
+  - Ex.: Predição do volume de chuva.
+    - Variáveis descritores: Umidade (x1), Bioma (x2), Velocidade do ar (x3), Volume de chuva (último dia (x4), última semana (x5)).
+    - Alvo: Volume de chuva (y).
+    - Objetivo: Encontrar uma relação entre as variáveis descritores e o alvo.
+      - Podemos encontrar uma equação linear do tipo: w0 + w1x1 + w2x2 + w3x3 + w4x4 + w5x5 = y
+      - Devemos determinar os valores do conjunto dos coeficientes 'w'.
+      - 'x' e 'y' são fornecidos para o treinamento do modelo.
+      - Os valores dos coeficientes 'w' devem gerar a melhor reta no plano cartesiano dos nossos dados.
+      <div>
+        <img src="./imgs/Aula02-img04.png" alt="Aula02-img04"/>
+      </div>   
+      &nbsp;
+
+### Regressão Linear Simples  
+
+- Refere-se quando temos somente uma variável independente (X) para fazermos a preição.
+- A linha de melhor ajuste é chamada de **linha de regressão**.  
+- Linhas verticais da linha de regressão aos **valores de amostra** são os chamados **deslocamentos ou resíduos** - os erros de previsão.  
+
+### Regressão Linear Múltipla  
+- Refere-se quando temos somente uma variável independente (X) para fazermos a predição.  
+- Hiperplano ajustado de um modelo de regressão linear com múltiplos atributos  
+
+### Onde podemos usar regressão linear?
+
+- Esse algoritmo pode ser utilizado em qualquer problema, onde as variáveis de entrada e saída são valores contínuos. Por exemplo:  
+  - Prever as vendas de um determinado produto.  
+  - Setor imobiliário (valor de um imóvel).  
+  - Calcular a expectativa de vida de um país.  
+  - Calcular a pressão sanguínia de um paciente.
+- **Quando aplicar?**
+  - Esse tipo de algoritmo é aplicado quando há uma boa correlação linear (positiva ou negativa) entre os dados (quando a associação entre os dados pode ser definida com uma reta).  
+
+- A função que representa bem a regressão linear é dada por: `f(x) = w0 + w1 * x1`
+  - `w0` representa o ponto inicial da reta.
+  - `w1` representa a inclinação da reta.
+
+### Modelo de regressão linear de mínimos quadrados ordinários  
+- Função objetivo:
+
+### Como minimizar a função objetivo
+### Método do gradiente descendente  
+
+- Gradiente é um vetor que indica o sentido e a direção na qual, por deslocamento a partir do ponto específico, obtém-se o maior incremento possível no valor de uma grandeza.  
+
+### Método do gradiente descendente  
+
+1. Usando gradiente descendente, podemos agora atualizar os pesos dando um passo na direção oposta do gradiente deltaJ(w) de nossa função de custo J(w).  
+1. A mudançã de peso deltaW é definida como o gradiente negativo multiplicado pela taxa de aprendizagem n:  
+
+--- 
+
+## Aula 06 - Redes Neurais - 25.04.2023
+
+### Neurônio Artificial
+- A rede neural pode ajustar os pesos com base no erro do último resultado do teste.
+- Os sinais de entrada modificados são somados em um único valor. Um deslocamento (_bias_) também é adicionado à soma.  
+- A rede neural também ajusta o _bias_ (viés) durante a fase de aprendizado.  
+- Após cada interação de aprendizado, pesos e viés são gradualemtne alterados.  
+  - O objetivo é que o próximo resultado fique mais próximo da saída desejada.  
+- O resultado do cálculo do neurônio é transformado em um sinal de saída.  
+  - Feito alimentando o resultado para uma função de ativação.  
+<div>
+  <img src="imgs/A06/Aula06-img01.png" alt="A06-img01" />
+</div>  
+&nbsp;
+
+- Função de decisão Φ(z) (phi)
+  - É preciso uma combinação linear de valores de entrada _x_ e um vetor de peso correspondente _w_.
+  - _z_ é o resultado dessa combinação (soma ponderada). _z_ = w1*x1 + ... + wm\*xm.
+  - Se a entrada líquida de uma determinada amostra for maior que um limite definido $\theta$, prevemos a classe 1. Caso contrário, a classe -1.  
+- Por questão de simplicidade, definimos $w_{0} = -\theta$ e $x_{0} = 1$, e daí temos: $z = w_{0}x_{0} + w_{1}x_{1} + ... + w_{m}x_{m} = w^Tx$
+- O limiar negativo, ou $w_{0} = - \theta$, é usualmente chamado de unidade de _bias_ (viés).  
+
+### Perceptron  
+
+<div>
+  <img src="imgs/A06/Aula06-img02.png" alt="A06-img02" />
+</div>  
+&nbsp;
+
+#### Regras de aprendizagem  
+- O modelo Perceptron limiarizado de Rosenblatt imita como um único neurônio no cérebro funciona (dispara ou não dispara).  
+1. Inicialize os pesos com o valor 0 ou próximos de 0 (de forma aleatória).  
+1. Para cada valor de treino x(i):  
+  - Compute o valor de saída ^y
+  - Atualize os pesos.  
+- $w_j := w_j + \Delta w_j$
+- $\Delta w_j = \eta(y^{(i)} - \^y^{(i)})x_j^{(i)}$
+  - $\eta$ é a taxa de aprendizado (geralmente, uma constante entre 0.0 e 1.0).
+- Para predições corretas, **os pesos não se alteram**.  
+  - $\Delta w_j = \eta(-1-(-1))x_j^{(i)} = 0$  
+- Para predições incorretas, os pesos são **empurraods na direção da classe de destino positiva ou negatva**.  
+  - $\Delta w_j = \eta(1 + 1)x_j^{(i)} = \eta(2)x_j^{(i)}$
+  - $\Delta w_j = \eta(- 1 - 1)x_j^{(i)} = \eta(-2)x_j^{(i)}$
+
+
