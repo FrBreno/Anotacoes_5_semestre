@@ -1528,3 +1528,401 @@ do socket (cadeia inFromServer).
 - **OBS**: Para mais detalhes dos códigos acima, consulte o livro do Kurose.
 
 ---
+
+## Aula 07 - Camada de Transporte - 20.04.2023
+
+### Serviços e protocolos de transporte  
+- Oferecem **comunicação lógica** entre processos de aplicação rodando em hospedeiros diferentes.
+- **Comunicação lógica**: Do ponto de vista da aplicação, tudo se passa como se os hospedeiros estivessem conectados diretamente. 
+- Desafio - Contornar dois problemas da camada de rede:
+   1. Como duas entidades podem se comunicar de maneira confiável por um meio que pode perder/corromper dados?  
+   1. Como controlar a taxa de transmissão de entidades de camada de transporte para evitar ou se recuperar de congestionamentos?
+- Protocolos de transporte rodam em sistemas finais.  
+  - Lado remetente: divide as mensagens da aplicação em **segmentos** e passa à camada de rede.  
+  - Lado destinatário: remonta os segmentos em mensagens e passa à camada de aplicação.  
+- mais de um protocolo de transporte disponível às aplicações.  
+  - Internet: TCP e UDP. 
+- Protocolos da camada de transporte são implementados no sistemas finais, mas não em roteadores de rede. 
+
+### Camada de transporte VS camada de rede  
+- Camada de rede: Comunicação lógica entre hospedeiros.  
+- Camada de transporte: comunicação lógica entre processos (conta com e amplia os serviços da camada de rede). 
+- Analogia com a família: 12 crianças (irmãos) mandando carta a outras 12 crianças (irmãos) em casas separadas.
+  - Processo: crianças.
+  - Mensagens da aplicação: cartas.
+  - Hospedeiros: casas.  
+  - Protocolo de transporte: Ana e Bill (responsáveis por receberem/enviarem as mensagens dos irmãos).  
+  - Protocolo da camada de rede: serviço postal.  
+- **Segmentos da camada de transporte**: Mensagens (recebidas de um processo) convertidas em pacotes de camada de transporte.
+  - Essa camada passa o segmento para a de rede no sistema final remetente.  
+  - O segmento é encapsulado em um pacote de camada de rede (datagrama) e enviado ao destinatário.
+  - O caminho inverso é realizado e o segmento é processado, disponibilizando os dados para a aplicação.  
+
+### Protocolos da camada de transporte da Internet  
+- Remessa confiável e em ordem (TCP).  
+  - Controle de congestionamento.  
+  - Controle de fluxo.  
+  - Estabelecimento da conexão.  
+- Remessa não confiável e desordenada (UDP).  
+  - Extensão sem luxo do IP pelo "melhor esforço".  
+- Serviços não disponíveis:  
+  - Garantias de atraso.  
+  - Garantias de largura de banda.  
+- Ao projetar uma aplicação de rede, o criador da aplicação deve especificar um desses dois protocolos (ao criar _sockets_).  
+- O protocolo de camada de rede de Internet é o **IP**
+  - IP é um serviço de entrega de melhor esforço (não há nenhuma garantia).  
+  - Não garante a entrega, ordenação e tampouco a integridade dos dados dos segmentos.
+  - Não é um serviço confiável.  
+- UDP e TCP fornecem uma verificação de integridade ao incluir campos de detecção de erros nos cabeçalhos de seus segmentos.  
+- Entrega de dados processo a processo e verificação de erros -> únicos serviços que o UDP fornece.  
+  - Como o IP, o UDP é não é um serviço confiável.  
+
+### Multiplexação e demultiplexação  
+
+- É a ampliação do serviço de entrega hospedeiro a hospedeiro provido pela camada de rede.  
+- Quando a camada de transporte recebe dados da camada de rede, ela precisa direcionar esses dados a um dos processos que estão rodando.
+  - Isso é feito através dos **sockets**.
+  - Um processo pode ter um ou mais sockets (identificados por número de porta).  
+- Demultiplexação no destinatário: entregando segmentos recebidos ao socket correto.  
+- Multiplexação no remetente: Colhendo dados de múltiplos sockets, envelopando dados com cabeçalho (usados depois para demultiplexação).
+<div>
+  <img src="./img/A07-img01.png" alt="A07-img01"/>
+</div>
+&nbsp;
+
+#### Como funciona a demultiplexação?
+- Hospedeiro recebe datagramas IP.
+  - Cada datagrama tem endereço IP de origem e endereço IP de destino.  
+  - Cada datagrama carrega 1 segmento da camada de transporte.
+  - Cada segmento tem número de porta de origem e de destino.  
+- Hospedeiro usa endereços IP e números de porta para direcionar segmento ao socket apropriado.
+<div>
+  <img src="./img/A07-img02.png" alt="A07-img02"/>
+</div>
+&nbsp;  
+
+#### Demultiplexação não orientada para conexão  
+- Cria sockets com números de porta:
+```
+DatagramSocket mySocket1 = new DatagramSocket(12534);
+DatagramSocket mySocket2 = new DatagramSocket(12535);
+```
+- Socket UDP identificado por tupla de dois elementos: (endereço IP destino, número porta destino).  
+- Quando hospedeiro recebe segmento UDP:  
+  - verifica número de porta de destino no segmento.  
+  - direciona segmento UDP para socket com esse número de porta.  
+- datagramas IP com diferentes endereços IP de origem e/ou números de porta de origem direcionados para o mesmo socket.  
+<div>
+  <img src="./img/A07-img03.png" alt="A07-img03"/>
+</div>
+&nbsp;  
+
+#### Demultiplexação orientada para conexão
+- Socket TCP identificado por tupla de 4 elementos:  
+  - Endereço IP de origem
+  - Número da porta de origem
+  - Endereço IP de destino
+  - Número da porta de destino
+- Hospedeiro destinatário usa todos os quatro valores para direcionar segmento ao socket apropriado.  
+- Hospedeiro servidor pode admitir muitos sockets TCP simultâneos:  
+  - Cada socket identificado por usar a própria tupla de 4 elementos.  
+- Servidores Web têm diferentes sockets para cada cliente conectado.  
+  - HTTP não persitente terá diferente sockets para cada requisição (problema).  
+<div>
+  <img src="./img/A07-img04.png" alt="A07-img04"/>
+</div>
+&nbsp;  
+
+### Transporte não orientado para conexão - UDP
+
+#### UDP: User Datagrama Protocol [RFC 768]  
+- Protocolo de transporte da Internet "sem luxo", básico.  
+- Serviço de "melhor esforço", segmentos UDP podem ser:  
+  - Perdidos.  
+  - Entregues à aplicação fora da ordem.  
+- **Sem conexão:**  
+  - Sem handshaking entre remetente e destinatário UDP.  
+  - Cada segmento UDP tratado independente dos outros.  
+- Por que existe um UDP?
+  - Sem estabelecimento de coneão.
+  - Simples: sem estado de conexão no remetente/destinatário.
+  - Cabeçalho de segmento pequeno.  
+  - Sem controle de congestionamento: UDP pode transmitir o mais rápido possível.
+- Normalmente usado para straming de aplicações de multimídea.  
+  - Tolerante a perdas.  
+  - Sensível à taxa de transmissão.
+- Outros usos:
+  - DNS
+  - SNMP
+- Transferência confiável por UDP: aumenta a confiabilidade na camada de aplicação.  
+  - Recuperação de erro específico da aplicação.
+<div>
+  <img src="./img/A07-img05.png" alt="A07-img05"/>
+</div>
+&nbsp;  
+
+#### Soma de verificação UDP
+- **Objetivo**: detectar "erros" (Ex.: bits invertidos) no segmento transmitido.  
+- Remetente:
+  - Trata conteúdo de segmento como sequência de inteiros de 16 bits.  
+  - Soma de verificação (checksum): adição (soma por complemento de 1) do conteúdo do segmento.  
+  - Remetente coloca valor da soma de verificação no campo de soma de verificação UDP.
+- Destinatário:
+  - Calcula soma de verificação do segmento recebido.  
+  - Verifica se a soma de verificação calculada é igual ao valor do campo de soma de verificação:
+    - Não = Erro detectado.
+    - Sim = Nenhum erro.  
+
+#### Exemplo de soma de verificação da Internet  
+- Nota: Ao somar números, um carryout do bit mais significativo precisa ser somado ao resultado.  
+- Exemplo: Somar dois inteiros de 16 bits.
+<div>
+  <img src="./img/A07-img06.png" alt="A07-img06"/>
+</div>  
+&nbsp;
+
+#### Princípio da transferência confiável de dados
+- Um canal confiável de transferência de dados é um canal onde nenhum dado é corrompido (trocado por 0 para 1 ou vice-versa) nem perdido, e todos são entregues na ordem em que foram enviados.  
+  - Exemplo: Modelo de serviço oferecido pelo TCP.
+- Esse serviço de abstração é implementado por um **protocolo de transferência confiável de dados**.  
+- TCP é um protocolo confiável de transferência de dados que é executado sobre uma camada de rede fim a fim não confiável (IP).
+<div>
+  <img src="./img/A07-img07.png" alt="A07-img07"/>
+</div>  
+&nbsp;
+
+- Características do canal confiável determinarão a complexidade do protocolo de transferência confiável (rdt).  
+
+#### Transferência confiável de dados sobre um canal perfeitamente confiável (rdt1.0)
+
+- Caso mais simples: canal subjacente é completamente confiável.  
+  - O protocolo `rdt1.0` é trivial.  
+- A seguir, temos as definições de **máquina de estado finito (_finite-state machine_ - FSM)**.
+  <div>
+    <img src="./img/A07-img08.png" alt="A07-img08"/>
+  </div>  
+  &nbsp;
+- Ambas as FSM da figura têm apenas um estado.  
+- O evento que causa a transição é mostrado acima da linha horizontal que a rotula.
+- As ações realizadas quando ocorre o evento são mostradas abaixo dessa linha.  
+- O lado remetente do `rdt` apenas aceita dados da camada superior pelo evento `rdt_send(data)`.  
+  - Cria um pacote que contém os dados (`make_pkt(data)`) e o envia para dentro do canal.  
+- O lado destinatário do `rdt` recebe um pacote do canal subjacente pelo evento `rdt_rcv(packet)`.
+  - Extrai os dados do pacote (`extract(packet), data`) e os passa para a camada superior (`deliver_data(data)`).  
+- Com um canal perfeitamente confiável, não há necessidade de o lado destinatário fornecer qualquer informação ao remetente, já que nada pode dá errado.
+- Também admitimos que o destinatário está capacitado a receber dados seja qual for a velocidade em que o remetente os envie.  
+
+#### Transferência confiável de dados por um canal com erros de bits: rdt2.0  
+
+- Canal subjacente pode inverter bits no pacote.  
+  - Soma de verificação para detectar erros de bit.  
+- A questão: como recuperar-se dos erros:  
+  - **reconhecimento (ACKs):** destinatário diz explicitamente ao remetente que o pacote foi recebido OK.  
+  - **reconhecimento negativos (NAKs):** destinatário diz explicitamente ao remetente que o pacote teve erros.  
+  - Remetente retransmite pacote ao receber NAK.  
+- Protocolos de transferência confiável de dados baseados nesse tipo de retransmissão são conhecidos como **Protocolos ARQ (Automatic Repeat reQuest - solicitação automática de repetição)**
+- Novos mecanismos (capacitações) no rdt2.0 (além do rdt1.0):  
+  - detecção de erro.  
+  - feedback do destinatário: mensagens de controle (ACK, NAK) destinatário->remetente.
+  - Retransmissão.  
+- O lado remetente do `rdt2.0` tem dois estados.
+  - No estado mais a esquerda, o protocolo do lado remetente está esperando que os dados sejam passados pela camada superior.  
+  - Os pacotes a serem enviados são criados contendo dados a serem enviados, junto com uma soma de verificação de pacote.  
+  - No estado mais a direita, o protocolo remetente está esperando por um pacote ACK ou NAK da parte do destinatário.
+    - Se um pacote ACK foi recebido, o remetente saberá que o pacote transmitido mais recetemente foi recebido corretamente.  
+    - Se for recebido um NAK, o protocolo retransmitirá o último pacote e esperará por um ACK ou NAK a ser devolvido pelo destinatário.  
+- Um estado que aguarda por ACK ou NAK **não pode receber mais dados da camada superior**.  
+  - O remetente não enviará novos dados até ter certeza de que o destinatário recebeu corretamente o pacote em questão.
+  - `rdt2.0` -> protocolo **pare e espere**.
+<div>
+  <img src="./img/A07-img09.png" alt="A07-img09"/>
+</div>  
+&nbsp;
+
+- **Defeito fatal:** Não trata a possibilidade do pacote ACK ou NAK está corrompido.
+  - Possibilidade: adicionar um novo campo ao pacote de dados e fazer o remetente numerar seus pacotes de dados colocando um **número de sequÊncia** nesse campo.
+    - Determinar se o pacote recebido é ou não uma retransmissão.  
+
+#### rdt2.1: remetente trata de ACK/NAKs corrompidos
+<div>
+  <img src="./img/A07-img10.png" alt="A07-img10"/>
+  <img src="./img/A07-img11.png" alt="A07-img11"/>
+</div>  
+&nbsp;
+
+- Uma mudança entre `rdt2.1` e `rdt2.2` é que o destinatário agora deve incluir o número de sequência do pacote que está sendo reconhecido por uma mensagem ACK.
+
+#### rdt2.2: um protocolo sem NAK  
+- Mesma funcionalidade de `rdt2.1`, usando apenas ACKs.  
+- Em vex de NAK, destinatário envia ACK para último pacote recebido OK.  
+  - Destinatário precisa incluir explicitamente # sequências do pacote sendo reconhecido com ACK.  
+- ACK duplicado no remetente resulta na mesma ação de NAK: _retransmitir pacote atual_.  
+<div>
+  <img src="./img/A07-img12.png" alt="A07-img12"/>
+  <img src="./img/A07-img13.png" alt="A07-img13"/>
+</div>  
+&nbsp;  
+
+#### Transferência confiável de dados por um canal com perda e com erros de bits: rdt3.0  
+
+- O canal subjacente possa perder pacotes.
+- A parte dos erros de bits é reaproveitada do protocolo `rdt2.2`.
+- Atribuiremos ao remetente o encargo de detectar e se recuperar das perdas de pacotes.  
+- O ideal seria que o protocolo se recuperasse da perda de pacotes logo que possível.
+  - Esperar pelo atraso do pior dos casos pode significar um longo tempo até que a recuperação do erro seja iniciada.  
+- O remetente faz uma escolha ponderada de um valor de tempo dentro do qual seria provável, mas não garantido, que a perda tivesse acontecido.  
+  - Se não for recebido um ACK nesse período, o pacote é retransmitido.
+  - Possibilidade em caso de atraso longo na transmissão -> **Pacotes de dados duplicados** (o protocolo `rdt2.2` já trata esse caso).  
+- Para implementar um mecanismo de retransmissão com base no tempo,
+é necessário um temporizador de contagem regressiva que interrompa o processo remetente após ter decorrido
+um dado tempo. 
+- É preciso que o remetente possa: 
+   1. acionar o temporizador todas as vezes que um pacote for enviado (quer seja a primeira vez, quer seja uma retransmissão).
+   2. responder a uma interrupção feita pelo temporizador (realizando as ações necessárias) e (3) parar o temporizador
+<div>
+  <img src="./img/A07-img14.png" alt="A07-img14"/>
+</div>  
+&nbsp;
+
+- A figura abaixo mostra como funciona sem pacotes perdidos ou atrasados e como manipula pacotes de dados perdidos.  
+- Agora temos um protocolo de transferência de dados confiável! 
+  - Somas de verificação
+  - números de sequência
+  - temporizadores
+  - pacotes de reconhecimento negativo e positivo.
+<div>
+  <img src="./img/A07-img15.png" alt="A07-img15"/>
+</div>  
+&nbsp;  
+
+#### Protocolos com paraelismo  
+- **Paralelismo:** remetente permite múltiplos pacotes "no ar", ainda a serem reconhecidos.  
+  - intervalo de números de sequência deve ser aumentado.  
+  - buffering no remetente e/ou destinatário.  
+- duas formas genéricas de protocolos com paralelismo:  **Go-Back-N**, **repetição seletiva**
+
+<div>
+  <img src="./img/A07-img16.png" alt="A07-img16"/>
+</div>  
+&nbsp;  
+
+- **Go-back-N: visão geral**  
+  - **remetente:** até N pacotes não reconhecidos na pipeline.  
+  - **destinatário:** só envia ACKs comulativos.  
+    - Não envia pacote ACK se houver uma lacuna.  
+  - **remetente:** tem temporizador para pacote sem ACK mais antigo.  
+    - Se o temporizador expirar: retransmite todos os pacotes sem ACK.  
+- **Repetição seletiva: visão geral**  
+  - **remetente:** Até pacotes não reconhecidos na pipeline.  
+  - **destinatário:** reconhece (ACK) pacotes individuais.  
+  - **remetente:** mantém temporizador para cada pacote sem ACK.  
+    - Se o temporizador expirar: retransmite aoenas o pacote sem ACK.  
+
+#### Go-Back_N (GBN)  
+- **remetente**
+  - #seq. de k bits no cabeçalho do pacote.  
+  "janela" de até N pacotes consecutivos sem ACK permitidos
+  <div>
+    <img src="./img/A07-img17.png" alt="A07-img17"/>
+  </div>  
+  &nbsp;  
+
+  - ACK(n): ACK de todos os n pacotes cumulativo.  
+    - Pode receber ACKs duplicaos (ver destinatário).  
+  - Temporizador para cada pacote no ar.  
+  - _timeout(n)_: retransmite pacote n e todos pacote com # sequência mais alto na janela.
+  <div>
+    <img src="./img/A07-img18.png" alt="A07-img18"/>
+  </div>  
+  &nbsp;  
+  
+  - Apenas ACK: sempre envia ACK para pacote recebido corretamente com # sequência mais alto _em ordem_.   
+    - Pode gerar ACKs duplicados.  
+    - Só precisa se lembrar de `expectedseqnum`.
+  - Pacote fora de ordem:
+    - Descarta (não mantém em buffer) -> Sem buffering no destinatário.  
+    - Reenvia ACK do pacote com # sequência mais alto em ordem.  
+- **GBN em operação**
+  <div>
+    <img src="./img/A07-img19.png" alt="A07-img19"/>
+  </div>  
+  &nbsp;  
+
+#### Repetição Seletiva
+
+- Destinatário reconhece individualmente todos os pacotes recebidos de modo correto.  
+  - Mantém pacotes em buffer, se for preciso, para eventual remessa em ordem para a camada superior.  
+- Remetente só reenvia pacotes para os quais o ACK não foi recebido.  
+  - Temporizador no remetente para cada pacote sem ACK.  
+- Janela do remetente.  
+  - N # seq. consecutivos
+  - Novamente limita #'s seq. de pacotes enviados, sem ACk.
+  <div>
+    <img src="./img/A07-img20.png" alt="A07-img20"/>
+  </div>  
+  &nbsp;  
+- Remetente:
+  - Dados de cima:
+    - Se aproxima de # seq. disponível na janela, envia pacote.
+  - timeout(n):  
+    - Reenvia pacote n, reinicia temporizador.  
+  - ACK(n):
+    - Marca pacote n como recebido.  
+    - Se n menor pacote com ACK, avança base da janela para próximo # seq. sem ACK
+- Destinatario  
+  - Pacote n:
+    - Envia ACK(n)
+    - Fora de ordem: buffer.  
+    - Em ordem: entrega (também entrega pacotes em ordem no buffer), avança janela para próximo pacote ainda não recebido.  
+- **Repetiçao seletiva em operação**
+<div>
+  <img src="./img/A07-img21.png" alt="A07-img21"/>
+</div>  
+&nbsp;  
+
+- **Repetição seletiva: dilema**
+- Exemplo:
+  - \# seq.: 0, 1, 2, 3
+  - Tamanho da janela = 3.
+  - Destinatário não vê diferença nos dois cenários:
+  <div>
+    <img src="./img/A07-img22.png" alt="A07-img22"/>
+  </div>  
+  &nbsp;  
+
+  - Passa incorretamente dados duplicados como novos em (a)
+---
+
+## Aula 08 - Camada de Transporte - 27.04.2023
+
+
+### Transporte Orientado para Conexão: TCP
+
+- Resumo de mecanismos de transferência confiável de dados e sua utilização:  
+   1. Soma de Verificação
+   2. Temporizador
+   3. Número de sequência
+   4. Reconhecimento
+   5. Reconhecimento Negativo
+   6. Janela, paralelismo
+
+#### A conexão TCP
+- Orientado para conexão.  
+  - Os dois processos precisam primeiro se "apresentar".
+  - Devem enviar segmentos preliminares para estabelecer os parâmetros de conexão.
+  - Iniciarão muitas variáveis de estado.  
+- Os elementos intermediários não mantém estado de conexão TCP (roteadores, comutadores e repetidores).  
+- TCP provê um serviço **full-duplex**.
+  - Conexão entre A e B -> Os dados podem fluir de A para B e de B para A ao mesmo tempo.
+- Conexão sempre **ponto a ponto**.  
+  - Entre um único remetente e um único destinatário.  
+- Estabelecendo a conexão:
+  - O cliente envia um segmento especial TCP.
+  - O servidor responde com um segundo segmento TCP especial.  
+  - O cliente responde novamente com um terceiro segmento especial (pode carregar uma carga últil).
+  - Chamamos isso de **apresentação de três vias**  
+- A quantidade máxima de dados que pode ser retirada e colocada em um segmento é limitada pelo **tamanho máximo do segmento (MSS)**.  
+- MSS é a quantidade máxima de dados de camada de aplicação no segmento, e não o tamanho máximo do segmento TCP incluindo cabeçalhos.  
+- **Segmento TCP:** dados do cliente + dados de cabeçalho.  
+- Uma conexão TCP consiste em buffers, variáveis e um _socket_ de conexão de um processo (isso vale para os dois hospedeiros).
+---
