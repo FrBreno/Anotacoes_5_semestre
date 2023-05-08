@@ -270,10 +270,65 @@ lim n→∞ xn = A
 - Geralmente o menor número perde muita precisão pois, nesta situação seus dígitos menos podem ser descartados durante a operação.
 
 <div>
-  <img src="./imgs/A02-img05.png" alt="A01-img05" />
+  <img src="./imgs/A02-img05.png" alt="A02-img05" />
 </div>  
 <div>
-  <img src="./imgs/A02-img06.png" alt="A01-img06" />
+  <img src="./imgs/A02-img06.png" alt="A02-img06" />
 </div>  
+
+---
+
+## Aula 03 - Raízes de Equações - 31.03.2023
+
+- Considere o seguinte problema:  
+<div>
+  <img src="./imgs/A03-img01.png" alt="A03-img01" />
+</div>  
+
+### Fase de Refinamento
+
+- Dependendo do tipo da função _f_, os métodos que veremos aqui obtém apenas uma aproximação.  
+- Nesta fase, considera uma aproximação para a raiz e melhorá-la sucessivamente até se obter uma aproximação com a precisão requerida.  
+
+#### Critério de Parada
+
+- Dizemos que Xk é uma boa "aproximação" para a raiz de β de uma equação _f(x) = 0_ se os critéios abaixo forem satisfeitos:
+  - | _f_ (Xk) | < ε
+  - | Xk - β | < ε
+- Onde ε é a precisão (tolerância) admitida.  
+
+### Método da Bisseção  
+
+- A ideia do método da Bisseção é reduzir o intervalo [a, b] que contém a raiz β dividindo-o ao meio a cada interação.  
+<div>
+  <img src="./imgs/A03-img05.png" alt="A03-img05" />
+</div>
+&nbsp;
+
+### Método da posição falsa  
+
+- No método da posição falsa, a função _f(x)_ é aproximada por uma função linear _g(x)_.
+<div>
+  <img src="./imgs/A03-img02.png" alt="A03-img02" />
+</div> 
+<div>
+  <img src="./imgs/A03-img03.png" alt="A03-img03" />
+</div> 
+<div>
+  <img src="./imgs/A03-img04.png" alt="A03-img04" />
+</div>
+&nbsp;
+
+- Podemos encontrar algumas alterações do método da posição falsa para ter uma convegência mais rápida.  
+  - O método de Pégaso é uma dessas adaptações.
+  - Durante o método de Pégaso, os pesos atribuídos aos pontos [$a_k$, $b_k$] são modificados apropriadamente.  
+
+### Método de Pégasos
+
+- A ideia do método é partir dos valores ($a_0, F(a_0), b_0, F(b_0)$) com $F(a_0) = f(a_0)$, $F(b_0) = f(b_0)$ e $F(a_0)F(b_0) < 0$:
+  -   encontrar novos valores ($a_k, F(a_k), b_k, F(b_k)$) com $F(a_k)F(b_k) < 0$ em cada passo do método.
+<div>
+  <img src="./imgs/A03-img06.png" alt="A03-img06" />
+</div>
 
 ---
