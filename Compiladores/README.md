@@ -1060,8 +1060,201 @@ S -> if E then S .else S      (any)
 - Podemos adicionar a amarração `mouse -> 4`, criando o mapeamento `m2` sem destruir o mapeamento `m1`.  
 <div>
   <img src="./imgs/A09/A09-img02.png" alt="A09-img02" />
-</div> 
-
-
+</div>
 
 ___
+
+## Back-end do Compilador
+## Aula 10 - Representação Intermediária (RI) - 09.05.2023  
+- Queremos compiladores para N linguagens, direcionadas para M arquiteturas de máquinas diferentes.  
+- RI nos possibilita elaborar N front-ends e M back-ends (N+M), ao invés de N*M.  
+
+### Representação Intermediária (RI)  
+
+- Facilmente construída a partir da análise sintática.  
+- Conveniente para a tradução para a linguagem de máquina.  
+- Facilmente alterada (re-escrita) durante as trasnformações (otimizações) de código.  
+
+### Escolha de uma RI
+
+- Reuso: adequação à linguagem e à arquitetura alvo, custos.  
+- Projeto: nível, estrutura, expressividade.  
+- "_Intermediate-language design is largely an art, not a science_", Steven Muchnick.  
+- Pode-se adotar mais que uma RI.  
+
+### Características de uma RI  
+
+- Alto nível: acesso a arrays, chamada de procedimentos.  
+- Nível Médio: composta por descrições de operações simples: busca/armazenamento de valores, movimentação, saltos, etc.  
+
+### Tipos de RI  
+
+- Representação gráfica:
+  - Árvores ou DAGs.
+  - Manipulação pode ser feita através de gramáticas.  
+  - Pode ser tanto de alto-nível como de nível médio.  
+
+### Representação em Árvore  
+- Tipos de operações (nós): const, binop, mem, call, etc.  
+<div>
+  <img src="./imgs/A10/A10-img01.png" alt="A10-img01" />
+</div>
+&nbsp;  
+
+### Representação Linear
+
+- Se assemelha a um pseudo-código para alguma máquina abstrata.  
+  - Java: Bytecode (interpretado ou traduzido).  
+  - Código de três endereços.  
+
+### Código de três endereços  
+- Forma geral: `x := y op z`
+- Representação linearizada de uma árvore sintática ou DAG.
+<div>
+  <img src="./imgs/A10/A10-img02.png" alt="A10-img02" />
+</div>
+&nbsp;  
+
+### Representação Linear
+
+- Tipos de sentenças:  
+  - Atribuição: `x := y op z` ou `z := y` ou `z := op y`.  
+  - Saltos: `goto L`
+  - Desvios condicionais `if x relop y goto L`.  
+  - Chamadas a procedimentos: `param x and call p,n`.  
+  - Retorno: `return y`.
+  - Arrays: `x =: y[i]` ou `x[i] := y`.  
+
+### Exemplo - Produto Interno
+<div>
+  <img src="./imgs/A10/A10-img03.png" alt="A10-img03" />
+</div>
+&nbsp;  
+
+### Representação
+- Quádruplas: (op, arg1, arg2, result)
+  - (1) -> (*, b, t1, t2)
+- Triplas:
+  - (0) -> (-, c, )
+  - (1) -> (*, b, (0))
+  - (2) -> (-, c,)
+<div>
+  <img src="./imgs/A10/A10-img04.png" alt="A10-img04" />
+</div>
+&nbsp;  
+
+- Triplas indiretas:
+  - (7) -> (-, c, )
+  - (8) -> (*, b, (7))
+  - (9) -> (-, c, )
+- Lista de sentenças:  
+  - (0) -> (7)
+  - (1) -> (8)
+  - (2) -> (9)
+  - Array de pointers da a ordem das triplas no programa.  
+
+### Geração de código de 3 endereços  
+- A partir da árvore sintática.  
+- Emissão a partir de ações na grmática com atributos.  
+<div>
+  <img src="./imgs/A10/A10-img05.png" alt="A10-img05" />
+</div>
+&nbsp;  
+
+### Representação Híbrida  
+- Combina-se elementos tanto das representações inteermediárias gráficas como das lineares.  
+- Usa RI linear para blocos de código sequencial e uma representação gráfica (grafo CFG) para representar o fluxo de controle entre esses blocos.
+
+#### Exemplo - CFG com código de três endereços
+<div>
+  <img src="./imgs/A10/A10-img06.png" alt="A10-img06" />
+</div>
+&nbsp;  
+
+### Caso Real - Gnu Compiler Collection  
+
+- Várias linguagens: pascal, fortran, C, C++
+- Várias arquiteturas alvo: MIPS, SPARC, Intel, Motorola, PowerPC, etc.  
+- Utiliza mais de uma representação intermediária.  
+  - Árvore sintática: construída por ações na gramática.  
+  - RTL: traduções de trechos da árvore.  
+
+### Caso Real - Xingó
+
+- Representação linear (XIR).  
+- Utiliza operações que se aproxima das disponíveis na linguagem C.  
+- Possibilita a geração de código fonte a partir da RI.
+
+<div>
+  <img src="./imgs/A10/A10-img07.png" alt="A10-img07" />
+</div>
+&nbsp;  
+
+### Compilador do Livro do Appel
+- O parser produz _abstract syntax trees_ (AST).  
+- Estas árvores refletem a estrtura sintática do programa.  
+- São a interface entre o parser e as próximas fases da compilação.  
+- Já abstraem detalhes irrelevantes para as fases seguintes. Ex.: Pontuação.  
+- As AST precisam ainda ser transformadas em uma RI mais apropriada para geração de código.
+
+### Tradução para RI  
+- A RI deveria ter componentes descrevendo operações simples.  
+  - Ex.: MOVE, um simples acesso, um JUMP, etc.  
+- A ideia é quebrar pedaços complicados da AST em um conjunto de operações de máquina.  
+- Cada operação ainda pode gerar mais de uma instrução assembly no final.  
+- Neste compilador, a RI contém somente corpo das funções.  
+- Código para o prólogo e o epílogo das funções é adicionado posteriormente.  
+- A tradução é feita percorrendo a AST e analisando caso a caso.
+<div>
+  <img src="./imgs/A10/A10-img08.png" alt="A10-img08" />
+</div>
+&nbsp;  
+
+---
+
+## Aula 11 - Blocos Básicos e Grafos de Fluxo de Controle - 10.05.2023 
+
+### Introdução  
+- Representação gráfica do código de 3 endereços.  
+  - É útil para entender os algoritmos de otimização.  
+- Nós: computação.  
+- Arestas: fluxo de controle.  
+- Muito usado em coletas de informações sobre o programa.  
+
+### Blocos básicos   
+
+- Sequência de instruções consecutivas.  
+- Fluxo de Controle:  
+  - Entra no início.  
+  - Sai pelo final.
+  - Não existem saltos para dentro ou do meio para fora da sequência.  
+- t1 = a * a
+- t2 = a * b
+- t3 = b * 3
+- t4 = t2 - t3  
+
+### Algoritmo para quebrar em BBs  
+- Entrada: sequência de código 3 endereços.  
+- Defina os líderes (iniciam os BBs):  
+  - Primeira sentença é um líder.  
+  - Todo alvo de um `goto`, condicional ou incondicional é um lider.  
+  - Toda sentença que sucede imediatamente um `goto` condicional ou incondicional, é um líder.  
+<div>
+  <img src="./imgs/A11/A11-img01.png" alt="A11-img01" />
+</div>
+<div>
+  <img src="./imgs/A11/A11-img02.png" alt="A11-img02" />
+</div>
+<div>
+  <img src="./imgs/A11/A11-img03.png" alt="A11-img03" />
+</div>
+&nbsp;  
+
+### Laços  
+- O que é um laço?
+- Como encontrá-los?  
+- Na figura: B3, B4.  
+- Um laço é um conjunto de nós tais que:  
+  - Todos os nós são fortemente conectados.  
+  - Têm uma única entrada.  
+- Um laço que não contém outros laços é um _inner loop_.
