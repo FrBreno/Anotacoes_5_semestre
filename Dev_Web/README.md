@@ -22,6 +22,92 @@ Um SPA (aplicativo de página única) é uma implementação de aplicativo da We
 ## Aula 02 - 15.03.2023
 ---
 Nessa aula foi apresentada as diferentes sintaxes de montagem de um componente (classe, função "normal", _arrow function_ e _arrow function_ simplificada) ou uma função. Além disso, foi explicada a forma de passar propriedades do componente pai para o componente filho.
+- Exemplo:
+```JS
+// V0:
+function HelloWorld() {
+    return <h2>Algum Nome</h2>;
+}
+
+// V1:
+const HelloWorld = () => {
+    return <h2>Algum Nome</h2>;
+};
+
+// V2:
+const HelloWorld = () => 
+    <div>
+        <h2>Algum nome</h2>
+    </div>
+
+// V3:
+import React from 'react';
+
+class HelloWorld extends React.Component {
+    render() {
+        return (
+            <div>
+                <h2>Algum nome com classe</h2>
+            </div>
+        );
+    }
+}
+
+export default HelloWorld;
+```  
+
+- Utilizando `jsx`, podemos simular um comportamento de tipagem para as propriedades dos componentes da seguinte forma (exemplo):
+  ```JS
+  import PropTypes from 'prop-types';
+
+  const Item = ({marca, ano_lanc}) => {
+    return (
+        <>
+            <li>{marca} - {ano_lanc}</li>
+        </>
+    )
+
+    Item.PropTypes = {
+        marca: PropTypes.string.isRequired,
+        ano_lanc: PropTypes.number,
+    }  
+
+    // Para atribuir valores default:
+    Item.defaultProps = {
+        marca: 'Faltou a marca',
+        ano_lanc: 0,
+    }
+  }
+  ```
+
+- Passando evento por props:
+
+```JS
+const Evento = () => {
+    const evento01 = () => console.log("Primeiro evento");
+    const evento02 = () => console.log("Segundo evento");
+
+    return (
+        <div>
+            <MyButton event={evento01} text="Primeiro evento"/>
+            <MyButton event={evento02} text="Segundo evento"/>
+        </div>
+    );
+}
+
+export default Evento;
+```
+```JS
+const Mybutton = ({event, text}) => {
+    return <button onClick={event}>{text}</button>
+}
+
+export default MyButton;
+```
+
+- Hierarquia de props: Passar as propriedades do componente pai para o filho.  
+  - Isso pode se tornar inviável em aplicações maiores.
+  - Para isso, podemos optar por utilizar outros recursos como o `useContext` e o `Redux`.
 
 ---
 ## Aula 03 - 22.03.2023
@@ -65,7 +151,7 @@ Nessa aula foi apresentada as diferentes sintaxes de montagem de um componente (
 
 ### Utilizando children
 
-- Siga o exemplo abaixo:
+- Siga o exemplo abaixo para `props.children`:
     ```JavaScript
     <div className='App'>
       <Supermercado nome='DuPovu'>
@@ -84,21 +170,39 @@ Nessa aula foi apresentada as diferentes sintaxes de montagem de um componente (
             </div>
         );
     }
-    ```
+    ```  
+- Note que `children` é uma palavra reservada do escopo das propriedades dos componentes.
 
 ### Utilizando Children
 
 - `Children` é uma forma de manipulação e transformação do JSX que é recebido pela propriedade `children`.
 - Ex.:
-  ```JavaScript
-    const mappedChildren = Children.map(children, child => 
-        <div className="Row">
-            {child}
+  ```JS
+
+  import { Children} from 'react';
+  const Supermercado = ({children, nome}) => {
+    return (
+        <div style={{display: 'flex', alignItems: 'center', flexDirection:'column'}}>
+            <h1>Supermercado {nome}</h1>
+            {Children.map(
+                children,
+                (child) => {
+                    return (
+                        <div style={{backgroundColor: 'red', color: '#fff'}}>
+                            {child}
+                        </div>
+                    );
+                }
+            )}
         </div>
-    );
+        );
+    }
   ```  
 - Para mais informações, consulte a [documentação de Children](https://react.dev/reference/react/Children).
 - A partir deste recurso, podemos utilizar `cloneElement()` (consultar [documentação](https://react.dev/reference/react/cloneElement)).
+- O `cloneElement()` é utilizado quando precisamos modificar as propriedades internas do nosso elemento filho.  
+  - Cria um clone e discarta o filho original.
+  - Modificamos e retornamos o clone em seu lugar de origem.
 ---
 ## Aula 04 - 29.03.2023
 
@@ -245,7 +349,7 @@ sessionStorage.setItem(aluno.matricula, JSON.stringify(aluno))
 
 ### Use Effect (Hook)
 - `useEffect` é um React Hook que permite sincronizar um componente com um sistema externo.
-  - Deve ser chamado no topo do componente.  
+  - Deve ser chamado no topo do componente (depois das declarações de estado e antes das funções auxiliares ou return do componente).  
 
 #### Parâmetros  
 - `setup`: A função com a lógica do seu efeito.
@@ -254,7 +358,7 @@ sessionStorage.setItem(aluno.matricula, JSON.stringify(aluno))
 
 #### Retorno
 - `useEffect` retorna `undefined`.
-
+---
 ## Aula 06 - 17.04.2023
 
 ### O que é o Axios?  
