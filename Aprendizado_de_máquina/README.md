@@ -626,6 +626,272 @@ Novos dados -> Modelo preditivo -> Predição
   - $\Delta w_j = \eta(-1-(-1))x_j^{(i)} = 0$  
 - Para predições incorretas, os pesos são **empurraods na direção da classe de destino positiva ou negatva**.  
   - $\Delta w_j = \eta(1 + 1)x_j^{(i)} = \eta(2)x_j^{(i)}$
-  - $\Delta w_j = \eta(- 1 - 1)x_j^{(i)} = \eta(-2)x_j^{(i)}$
+  - $\Delta w_j = \eta(- 1 - 1)x_j^{(i)} = \eta(-2)x_j^{(i)}$  
+
+#### Convergência
+
+- A convergência do Perceptron é garantida apenas se:
+  - As duas classes são linearmente separáveis.  
+  - A taxa de aprendizado é suficientemente pequena.
+- Se as duas classes não puderem ser separadas por um limite de decisão linear, podemos:
+  - definir um número máximo de passes no conjunto de dados de treinamento (épocas) e/ou um limite para o número de erros de classificação tolerados.  
+<div>
+  <img src="imgs/A06/Aula06-img03.png" alt="A06-img03" />
+</div>  
+&nbsp;  
+
+#### Diagrama do Perceptron
+<div>
+  <img src="imgs/A06/Aula06-img04.png" alt="A06-img04" />
+</div>  
+&nbsp;  
+
+- O perceptron recebe as entradas de uma amostra x e as combina com os pesos w para calcular a entrada líquida (Somatório). 
+-  A entrada líquida é então passada para a função de limite, que gera uma saída binária -1 ou +1 (o rótulo de classe previsto da amostra). 
+- Durante a fase de aprendizado, esta saída é usada para calcular o erro da previsão e atualizar os pesos.  
+
+### Perceptron - Mais informações  
+
+- A convergencia é um dos grandes problemas do Perceptron.  
+- A regra de aprendizado do perceptron converge se as duas classes puderem ser separadas por um hiperplano linear. 
+- Se as classes não puderem ser separadas perfeitamente pelo limite de decisão linear, os pesos nunca pararão de atualizar, a menos que definamos um número máximo de épocas.
+
+---
+## Aula 07 - Cross Validation VS Hold Out - 08.05.2023
+
+---
+## Aula 08 - Redes Neurais - 16.05.2023
+
+### Funcionamento de uma rede neural
+
+- _Input X_ -> _Rede Neural_ -> _Predição Y'_
+
+#### Funcionamento de uma rede neural profunda
+
+<div>
+  <img src="imgs/A08/Aula08-img01.png" alt="A08-img01" />
+</div>  
+&nbsp;
+
+- Transformações são implementadas por camadas.  
+- Camadas são parametizadas por seus **pesos**.  
+- **Aprendizado** consite em encontrar um bom conjunto de pesos.
+
+<div>
+  <img src="imgs/A08/Aula08-img02.png" alt="A08-img02" />
+</div>  
+&nbsp;  
+
+### Treinamento do modelo
+<div>
+  <img src="imgs/A08/Aula08-img03.png" alt="A08-img03" />
+</div>  
+&nbsp;    
+
+- Cada camada de rede neural aplica uma transformação do tipo $output = f(dot(input, W) + b)$.  
+- $W$ e $b$ são os pesos da camada (ou parâmetro treinável).  
+- Passo-a-passo:
+  1. Inicialização dos pesos.  
+  1. Lote de amostras de entrada vetorizado (tensor).  
+  1. Transformação do tipo $f(dot(input, W) + b)$.  
+  1. Obtém-se a saída da rede.
+  1. Uma função mede a disparidade (erro) da saída e valor esperado (_loss function_).  
+  1. Pesos são alterados para reduzir um pouco o valor do erro (perda ou _loss score_) para o lote (_batch_).  
+  1. Uma _loss_ pequena significa que o modelo aprendeu.  
+
+### Gradiente descendente  
+- Funções diferenciáveis:  
+  - Existe derivada em cada ponto do domínio.  
+  - Encademaneto resulta em outra função.
+  <div>
+    <img src="imgs/A08/Aula08-img04.png" alt="A08-img04" />
+  </div>  
+  &nbsp;
+- Lembrando que a derivada da função é a taxa de variação instantânea de Y em relação a x em um ponto.  
+
+### Derivada de uma função de tensores  
+- O mesmo conceito pode ser aplicado para:  
+  - Uma função que transforma uma tupla [x, y] em um escalar z (espaço 3-D).  
+  - Funções sobre matrizes.  
+  - Funções sobre tensores de rank-3.  
+  - Qualquer função cuja superfície seja contínua e suave.  
+
+### Gradiente
+- Generalização do conceito de gradiente derivado para funções que usam
+tensores como entradas.
+-  O gradiente de uma função tensorial representa a curvatura da superfície
+multidimensional descrita pela função.  
+- O que temos numa rede neural?  
+  - Um tensor de entrada x.
+  - Uma matriz de pesos W.
+  - Uma variável alvo y_true.  
+  - Uma função de erro/perda loss.  
+```Python
+y_pred = dot(W, x)
+loss_value = loss(y_pred, y_true)
+```  
+1. Usar o modelo para fazer predições para x.  
+1. Estima o qual longe do valor real as predições estão.  
+```Python
+loss_value = f(W)
+```  
+1. Descreve a curva formada pelos valores de _loss_ quando os pesos (W) variam.  
+<div>
+  <img src="imgs/A08/Aula08-img05.png" alt="A08-img05" />
+</div>  
+&nbsp;  
+
+  - Se a derivada de $f$ no ponto $W0$ é **grad(loss_value, W0)**, então **grad(loss_value, W0)[i,j]** indica a direção e magnitude da mudança de _loss_value_ ao modificaar **W0[i,j]**.  
+  - Pode-se reduzir o valor da $loss(W)$ movendo $W$ na direção oposta ao do gradiente:  
+    - **W1 = W0 - step * grad(f(W0, W0))**, onde step é um valor escalar pequeno.  
+
+### Gradiente descendente estocástico (SGD)  
+- Os parâmetros (pesos) são atualizados com base no gradiente de um lote aleatório de dados (em batch).
+
+<div>
+  <img src="imgs/A08/Aula08-img06.png" alt="A08-img06" />
+</div>  
+&nbsp;  
+
+- Existem diversas variantes do algoritmo SGD diferindo por como levar os pesos anteriores em consideração.  
+  - SGD com momentum.
+  - Adagrad.  
+  - RMSprop.
+
+### Algoritmo Backpropagation: lidando com cadeias de derivadas
+
+- Sejam as funções f, g e a composta fg.
+```Python
+def fg(x):
+  x1 = g(x)
+  y = f(x1)
+  return y
+```
+- **Regra da cadeia**:
+  - fg’(x) = f’(g(x))*g’(x)
+  - grad(y, x) == grad(y, x1) * grad(x1, x)
+- A aplicação da regra da cadeia para o cálculo dos valores de gradiente de uma rede neural dá origem
+ao algoritmo chamado backpropagation.  
+- Utilizando o modelo de grafo para entender a aplicação do _backpropagation_:    
+<div>
+  <img src="imgs/A08/Aula08-img07.png" alt="A08-img07" />
+</div>  
+&nbsp;   
+
+- Considere um grafo de um modelo simplificado:  
+- **Etapa _Forward_**
+  - Valores de entrada e pesos são aplicados e propagados pela rede.
+  <div>
+    <img src="imgs/A08/Aula08-img08.png" alt="A08-img08" />
+  </div>  
+  &nbsp;  
+- **Etapa _Backrward_**
+  - Resultado da loss é propagado no inverso.S
+  <div>
+    <img src="imgs/A08/Aula08-img09.png" alt="A08-img09" />
+  </div>  
+  &nbsp;  
+
+### Workflow
+1. Definir a arquitetura da rede neural
+2. Carregar e preparar os dados
+3. Alimentar a rede com os dados de treino
+4. Treinar a rede neural
+5. Avaliar o modelo treinado
+6. Usar o modelo para fazer predições
+
+### Arquitetura da rede neural  
+
+- Camada: bloco de construção das redes neurais.
+<div>
+  <img src="imgs/A08/Aula08-img10.png" alt="A08-img10" />
+</div>  
+&nbsp;  
+
+```Python
+from tensorlow import keras
+from tensorlow.keras import layers 
+model = keras.Sequential([
+  layers.Dense(512, actuvation="relu")
+  layers.Dense(10, actuvation="softmax")
+])
+```  
+
+### Compilação do modelo  
+
+ - A etapa de compilação prepara o modelo para o treinamento. Nesta etapa são
+definidos:
+    - O otimizador: algoritmo que ajusta o modelo para melhorar
+    - A função de perda (loss)
+    - Métricas para monitoramento durante o treino e o teste, por exemplo,
+acurácia (fração corretamente classificada)
+
+```Python
+model.compile(optimizer="rmsprop", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+```  
+
+### Preparação dos dados
+
+- Pré-processar os dados
+- Remodelando-os para a forma que o modelo espera
+- Dimensionando-os para que todos os valores estejam no intervalo [0,1].  
+- Utilizando o dataset _mnist_:  
+<div>
+  <img src="imgs/A08/Aula08-img11.png" alt="A08-img11" />
+</div>  
+&nbsp;  
+
+### Treinando o modelo  
+<div>
+  <img src="imgs/A08/Aula08-img12.png" alt="A08-img12" />
+</div>  
+&nbsp;  
+<div>
+  <img src="imgs/A08/Aula08-img13.png" alt="A08-img13" />
+</div>  
+&nbsp;  
+
+### Representação de dados para redes neurais
+
+#### Tensores
+- Matrizes multidimensionais, também chamadas de tensores
+- Um tensor é um contêiner de dados numéricos
+- Tensores são um generalização de matrizes para um número arbitrário de
+dimensões ( freqüentemente chamada de eixo)
+- Número de eixos é chamado de rank
+- **Atributos**:
+  - Número de eixos (rank)
+  - Formato (Shape)
+  - Tipo de dados
+  <div>
+    <img src="imgs/A08/Aula08-img14.png" alt="A08-img14" />
+  </div>  
+  &nbsp;  
+
+#### Batch de dados
+- Modelos de aprendizado profundo não processam um conjunto de dados inteiro
+de uma vez; em vez disso, eles quebram o dados em pequenos lotes (batch).   
+<div>
+  <img src="imgs/A08/Aula08-img15.png" alt="A08-img15" />
+</div>  
+&nbsp; 
+
+#### Tensores no mundo real
+- Dados vetoriais
+  - Dados de pessoas (idade, gênero, salário)
+  - Documento de texto (cada posição conta o número de vezes que uma
+determinada aparece).  
+- Dados de séries temporais/sequenciais
+  - Preços (maior e menor preço armazenado por minuto).  
+  - _tweets_
+- Imagens
+  <div>
+    <img src="imgs/A08/Aula08-img16.png" alt="A08-img16" />
+  </div>  
+  &nbsp;  
+- Vídeos
+  - Uma sequência de _frames_.  
+  - Cada _frame_ sendo uma imagem colorida.
 
 
+---
