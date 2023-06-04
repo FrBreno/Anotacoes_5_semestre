@@ -330,5 +330,35 @@ lim n→∞ xn = A
 <div>
   <img src="./imgs/A03-img06.png" alt="A03-img06" />
 </div>
+&nbsp;
+
+---
+
+## Aula 04 - Interpolação - 31.03.2023
+
+### Conceitos de Interpolação
+
+- Interpolar uma função $f(x)$ consiste em aproximar essa função por outra função $g(x)$, que satisfaça algumas propriedades.  
+- A função $g(x)$ é então usada em substituição à função $f(x)$.
+<div>
+  <img src="./imgs/A04/A04-img01.png" alt="A04-img01" />
+</div>
+&nbsp;
+
+### Existência e unicidade do polinômio interpolador  
+<div>
+  <img src="./imgs/A04/A04-img02.png" alt="A04-img02" />
+  <img src="./imgs/A04/A04-img04.png" alt="A04-img04" />
+</div>
+&nbsp;
+
+### Polinômio de Lagrange
+<div>
+  <img src="./imgs/A04/A04-img03.png" alt="A04-img03" />
+  <img src="./imgs/A04/A04-img05.png" alt="A04-img04" />
+</div>
+&nbsp;  
+
+### Polinômio de Newton
 
 ---
