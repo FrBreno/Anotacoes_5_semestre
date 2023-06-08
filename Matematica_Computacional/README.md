@@ -362,3 +362,77 @@ lim n→∞ xn = A
 ### Polinômio de Newton
 
 ---
+
+## Aula 05 - Integração - 12.04.2023
+### Integração numérica
+
+- Método para calcular uma integral definida de forma numérica.  
+- Visa resolver integrais que não tem solução analítica ou que são muito defíceis de resolver. 
+
+#### Problemas
+- Na determinação numérica de uma integral, várias situações podem ocorrer:
+  - A determinação da primitiva  $F$  pode ser "difícil"
+  - função  $f$  a integrar pode não possuir uma primitiva $F$.
+  - A função $f$ pode ser conhecida apenas pelos seus pontos  $(x_i,f(x_i))$  e não pela sua expressão analítica.
+
+### Regra dos Trapézios
+- Consiste em aproximar $f$ com um polinômio $p1(x)$ de grau 1 no intervalo $[a,b]$, onde $x_0 = a$ e $x_1 = b$.
+<div>
+  <img src="./imgs/A05/A05-img01.png" alt="A05-img01" />
+</div>
+&nbsp;
+
+```Python
+def regra_trapezio(f,a,b):
+  return (f(a)+f(b))/2 * (b-a)
+```
+
+### Regra composta dos trapézios
+- Consiste em dividir $[a,b]$ em $n$ subintervalos de tamanho $h$, e em cada um deles, aproximar $f$ por uma reta (ou seja, por um polinômio de grau 1).  
+<div>
+  <img src="./imgs/A05/A05-img02.png" alt="A05-img02" />
+</div>
+&nbsp;
+
+```Python
+def regra_trapezio_composta(f,n,a,b):
+  soma = 0
+  h = (b-a)/n # distância entre os pontos
+  l = a
+  for i in range(n):
+    u = l + h
+    soma += regra_trapezio(f, l, u)
+    #print(f"{l} {u}")
+    l = u 
+  return soma
+```
+
+### Regra de Simpson 1/3
+- Consiste em aproximar $f$ com um polinômio $p2(x)$ de grau 2 em um intervalo $[a,b]$ com 3 pontos.  
+<div>
+  <img src="./imgs/A05/A05-img03.png" alt="A05-img03" />
+</div>
+&nbsp;
+
+```Python
+def simpson13(f,a,b):
+  h = (b-a)/2
+  x0 = a
+  x1 = a + h
+  x2 = a + 2*h
+  #print(f"{x0} {x1} {x2}")
+  return (h/3)*(f(x0)+4*f(x1)+f(x2))
+```
+- Também podemos fazer a versão composta desta regra:
+```Python
+def simpson13_composta(f,n,a,b):
+  soma = 0
+  h = (b-a)/n # tamanho de cada intevalo
+  l = a
+  for i in range(n):
+    u = l + h
+    soma += simpson13(f, l, u)
+    #print(f"{l} {u}")
+    l = u 
+  return soma
+```
