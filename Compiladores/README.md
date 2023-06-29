@@ -1257,4 +1257,24 @@ ___
 - Um laço é um conjunto de nós tais que:  
   - Todos os nós são fortemente conectados.  
   - Têm uma única entrada.  
-- Um laço que não contém outros laços é um _inner loop_.
+- Um laço que não contém outros laços é um _inner loop_.  
+
+### Directed Acyclic Graphs
+
+- Úteis para transformações e BBs.  
+- Mostra como os valores computados são usados em sentenças subsequêntes.
+- Common Sub-expression Elimination (CSE).  
+- Não confunfir com o CFG.  
+  - DAG: representa um BB.  
+  - CFG: Nós são os BBS.
+- Construção:
+  - Folhas são identificadores únicos.
+    - Variáveis, constantes.  
+    - São os valores iniciais das variáveis.  
+    - Usa-se indíces para não confundir com o valor atual.
+  - Nós internos são operadores.  
+    - O rótulo é o operador associado.  
+    - Podem ter uma lista de variáveis associados.  
+      - É o último valor computado para cada uma delas.  
+    - Um nó associado a cada sentença.  
+    - Filhos representam a última definição dos operandos.

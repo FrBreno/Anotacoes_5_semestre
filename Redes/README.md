@@ -1926,3 +1926,45 @@ um dado tempo.
 - **Segmento TCP:** dados do cliente + dados de cabeçalho.  
 - Uma conexão TCP consiste em buffers, variáveis e um _socket_ de conexão de um processo (isso vale para os dois hospedeiros).
 ---
+
+## Aula 09 - Camada de Rede - 11.05.2023
+
+### Camada de Rede
+- Segmento é transportado do hosp.emissor ao receptor.  
+- O lado emissor encapsula segmentos em datagramas antes de enviá-los.  
+- O lado receptor entrega segmentos a camada de transporte.  
+- Temos protocolos da camada de rede em cada hospedeiro e roteador.  
+- O roteador examina campos de cabeçalho em todos os datagramas IP que passam por ele para indexar na **tabela de repasse**.  
+
+### Duas importantes funções da camada de rede 
+- **repasse:** mover pacotes da entrada do roteador para a saída apropriada do roteador (do enlace de entrada para o enlace de saída).  
+- **roteamento:** determinar rota seguida pelos pacotes da origem ao destino (entre hospedeiros finais).
+  - Algoritmos que determinam a melhor rota (centralizado ou descentralizado).
+  - Um roteador recebe mensagens de protocolo de roteamento, que são utilizadas para configurar sua tabela de repasse  
+
+### Estabelecimento de conexão  
+- 3° função importante em algumas arquiteturas de rede:  
+  - ATM, _frame relay_, X.25
+- Antes que os datagramas fluam, dois hospedeiros finais e roteadores entre eles estabelecem conexão virtual.  
+  - Roteadores são envolvidos.  
+- Serviço de conexão da camada de rede VS transporte:  
+  - **rede:** entre dois hospedeiros (também pode envolver roteadores entre eles, no caso de VCs).  
+  - **Transporte:** entre dois processos.  
+
+### Modelo de serviço de rede
+- Que _modelo de serviço_ é o melhor para o "canal" que transporta datagramas do remetente ao destinatário?  
+- Exemplo de serviços:
+   1. **Para datagramas individuais**
+      - Entrada grantida.  
+      - Entrega garantida com atraso limitado.
+   1. **Para fluxo de datagramas**  
+      - Entrega de datagrama na ordem.  
+      - Largura de banda mínima garantida.  
+      - Restrições sobre mudanças no espaçamento entre pacotes.
+
+<div>
+  <img src="./img/A09/A09-img01.png" alt="A09-img01"/>
+</div>  
+&nbsp;  
+
+---

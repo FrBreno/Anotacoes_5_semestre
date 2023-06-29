@@ -893,5 +893,22 @@ determinada aparece).
   - Uma sequência de _frames_.  
   - Cada _frame_ sendo uma imagem colorida.
 
-
 ---
+
+## Aula 08 - Regularização - 23.05.2023
+
+### Reduzindo a generalização do modelo (Overfitted Model) 
+- Aumentar o conjunto de treino.
+- Introduzir penalidades para a complexidade (regularização)
+- Escolher um modelo com menos parâmetros.  
+- Reduzir a dimensionalidade dos dados.  
+  - Selecionar apenas os atributos mais importantes.
+  - Projetar o vetor de atributos em um espaço reduzido (Ex.: PCA)
+    - Ex.: Projetar um vetor de mil posições em um espaço de 10 posições.  
+
+### Regularização
+- Vamos adicionar uma penalidade a função de custo.  
+
+
+### Regularização L2
+- É a soma dos pesos ao quadrado (quanto maior o peso, maior a penalização).
